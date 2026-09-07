@@ -5451,7 +5451,7 @@
   "Themes": "佈景主題",
   "Themes…": "佈景主題…",
   "There are still conflicts. You must stage these before committing": "仍有衝突。提交前必須先暫存這些變更",
-  "There {} {} {} with the same keystrokes.": "有 {} {} {} 使用相同的按鍵",
+  "There are {} keybindings with the same keystrokes.": "有 {} 個按鍵繫結使用相同的按鍵",
   "There’s no active call; join one first.": "目前沒有進行中的通話，先加入一個。",
   "These are not run if formatting is off.": "若格式化已關閉則不會執行",
   "These are populated when choosing \"Allow always\" from a sandbox": "這些項目會在沙箱權限提升提示對話方塊中選擇「一律允許」時",

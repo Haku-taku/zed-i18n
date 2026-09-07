@@ -71,6 +71,36 @@ _COMPOSITE_MESSAGE_RULES = (
             "the project-rule count; keep one template natural for positive counts."
         ),
     ),
+    CompositeMessageRule(
+        id="keymap.matching_bindings_count",
+        file="crates/keymap_editor/src/keymap_editor.rs",
+        enclosing_fn="KeybindingEditorModal::render",
+        fingerprint=(
+            'format!("There {} {} {} with the same keystrokes.",'
+            'ifmatching_bindings_count==1{"is"}else{"are"},'
+            'matching_bindings_count,'
+            'ifmatching_bindings_count==1{"binding"}else{"bindings"})'
+        ),
+        ordinal=0,
+        anchor=None,
+        virtual_source="There are {} keybindings with the same keystrokes.",
+        kind="label",
+        call="Label::new",
+        visible_args=(1,),
+        suppressed_args=(
+            SuppressedArgument(0, 'ifmatching_bindings_count==1{"is"}else{"are"}', "string"),
+            SuppressedArgument(
+                2, 'ifmatching_bindings_count==1{"binding"}else{"bindings"}', "string"
+            ),
+        ),
+        translation_note=(
+            "Complete explanatory sentence about keybindings using the same keystrokes in the keybinding editor. "
+            "The only placeholder is the positive count, not English grammar fragments. "
+            "Keep sentence form and use wording that works for both one and multiple keybindings "
+            "(for example, a sentence stating the number of matching keybindings). "
+            "The English UI retains the original singular/plural branches."
+        ),
+    ),
 )
 
 
@@ -126,6 +156,24 @@ def find_composite_message_matches(
 
 def required_composite_message_rule_ids() -> frozenset[str]:
     return frozenset(rule.id for rule in _COMPOSITE_MESSAGE_RULES)
+
+
+def verify_composite_message_occurrence(
+    source_bytes: bytes,
+    relative_path: str,
+    source: str,
+    occurrence: dict[str, object],
+) -> CompositeMessageRule:
+    matches = [
+        match for match in find_composite_message_matches(source_bytes, relative_path)
+        if match.rule.id == occurrence.get("composite_rule_id")
+        and match.rule.virtual_source == source
+        and match.literal_start_byte == occurrence.get("start_byte")
+        and match.literal_end_byte == occurrence.get("end_byte")
+    ]
+    if len(matches) != 1:
+        raise ValueError(f"stale composite message occurrence: {relative_path}: {source!r}")
+    return matches[0].rule
 
 
 def render_composite_translation(

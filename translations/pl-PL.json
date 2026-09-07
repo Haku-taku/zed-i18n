@@ -5451,7 +5451,7 @@
   "Themes": "Motywy",
   "Themes…": "Motywy…",
   "There are still conflicts. You must stage these before committing": "Nadal występują konflikty. Przed zatwierdzeniem trzeba je przygotować",
-  "There {} {} {} with the same keystrokes.": "Istnieje {} {} {} z tymi samymi klawiszami.",
+  "There are {} keybindings with the same keystrokes.": "Liczba powiązań klawiszy z tymi samymi naciśnięciami klawiszy wynosi {}.",
   "There’s no active call; join one first.": "Brak aktywnego połączenia; najpierw dołącz do rozmowy.",
   "These are not run if formatting is off.": "Nie są uruchamiane, gdy formatowanie jest wyłączone.",
   "These are populated when choosing \"Allow always\" from a sandbox": "Są uzupełniane po wybraniu opcji „Zezwól zawsze” w monicie",

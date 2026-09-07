@@ -5709,7 +5709,7 @@
   "Themes": "Themes",
   "Themes…": "Themes…",
   "There are still conflicts. You must stage these before committing": "There are still conflicts. You must stage these before committing",
-  "There {} {} {} with the same keystrokes.": "There {} {} {} with the same keystrokes.",
+  "There are {} keybindings with the same keystrokes.": "There are {} keybindings with the same keystrokes.",
   "There’s no active call; join one first.": "There’s no active call; join one first.",
   "These are not run if formatting is off.": "These are not run if formatting is off.",
   "These are populated when choosing \"Allow always\" from a sandbox": "These are populated when choosing \"Allow always\" from a sandbox",

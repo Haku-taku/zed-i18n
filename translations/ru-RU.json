@@ -5451,7 +5451,7 @@
   "Themes": "Темы",
   "Themes…": "Темы…",
   "There are still conflicts. You must stage these before committing": "Остались конфликты. Их необходимо внести в индекс перед коммитом",
-  "There {} {} {} with the same keystrokes.": "Существует {} {} {} с теми же нажатиями клавиш.",
+  "There are {} keybindings with the same keystrokes.": "Число сочетаний клавиш с такими же нажатиями клавиш равно {}.",
   "There’s no active call; join one first.": "Нет активного звонка; сначала присоединитесь к звонку.",
   "These are not run if formatting is off.": "Не выполняются, если форматирование отключено.",
   "These are populated when choosing \"Allow always\" from a sandbox": "Заполняются при выборе «Разрешать всегда» в диалоге",

@@ -2,9 +2,18 @@ import hashlib
 import json
 import shutil
 import unittest
+from dataclasses import asdict
 from pathlib import Path
 
 from tools.zed_i18n.config import ProjectConfig
+from tools.zed_i18n.extract import extract_ui_strings_from_source
+from tests.test_composite_messages import (
+    KEYBINDINGS_FILE,
+    KEYBINDINGS_SOURCE,
+    PROJECT_RULES_FILE,
+    _keybindings_source,
+    _project_rules_source,
+)
 from tools.zed_i18n.runtime_bundles import (
     compile_format_plan,
     generate_runtime_bundles,
@@ -578,24 +587,16 @@ enabled = true
         self.assertEqual(bundle["messages"]["Hello world"], "안녕 세상")
 
     def test_maps_a_composite_catalog_key_to_its_runtime_format(self) -> None:
-        source_text = '''pub fn label(count: usize) -> String {
-    format!("{} {}", count, pluralize("project rule", count))
-}
-'''
-        source_file = self.zed_root / "crates/sample/src/lib.rs"
+        source_text = _project_rules_source()
+        source_file = self.zed_root / PROJECT_RULES_FILE
         source_file.parent.mkdir(parents=True)
         source_file.write_text(source_text, encoding="utf-8")
-        literal = '"{} {}"'
-        start = len(source_text[: source_text.index(literal)].encode("utf-8"))
-        occurrence = self._occurrence(
-            line=2,
-            start=start,
-            end=start + len(literal.encode("utf-8")),
-            call="Button::new",
-            kind="button",
-        )
-        occurrence["composite_rule_id"] = "agent.project_rules_count"
         catalog_source = "{} project rules"
+        occurrence = asdict(next(
+            item for item in extract_ui_strings_from_source(source_text, PROJECT_RULES_FILE)
+            if item.source == catalog_source
+        ))
+        occurrence.pop("source")
         self._write_inputs(
             {catalog_source: catalog_source},
             {
@@ -623,6 +624,90 @@ enabled = true
             bundle["formats"]["{} {}"],
             [{"text": "프로젝트 규칙 "}, {"arg": "0"}, {"text": "개"}],
         )
+
+    def _write_keybindings_composite(self):
+        source_text = _keybindings_source()
+        source_file = self.zed_root / KEYBINDINGS_FILE
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(source_text, encoding="utf-8")
+        occurrence = asdict(next(
+            item for item in extract_ui_strings_from_source(source_text, KEYBINDINGS_FILE)
+            if item.source == KEYBINDINGS_SOURCE
+        ))
+        occurrence.pop("source")
+        manifest = {KEYBINDINGS_SOURCE: {
+            "status": "accepted", "occurrences": [occurrence],
+        }}
+        translations = {KEYBINDINGS_SOURCE: "같은 키 입력을 사용하는 키 바인딩이 {}개 있습니다."}
+        self._write_inputs({KEYBINDINGS_SOURCE: KEYBINDINGS_SOURCE}, manifest, translations)
+        return source_file, source_text, manifest, translations
+
+    def test_keybindings_composite_preserves_count_across_apply_and_runtime(self) -> None:
+        from tools.zed_i18n.apply import apply_translations
+        from tools.zed_i18n.apply_universal import apply_universal
+
+        source_file, source_text, manifest, translations = self._write_keybindings_composite()
+        report = apply_translations(self.zed_root, manifest, translations)
+        self.assertTrue(report.ok)
+        self.assertIn(
+            '"같은 키 입력을 사용하는 키 바인딩이 {1}개 있습니다.{0:.0}{2:.0}"',
+            source_file.read_text(encoding="utf-8"),
+        )
+        source_file.write_text(source_text, encoding="utf-8")
+        generate_runtime_bundles(self.root, self.zed_root, self._project())
+        directory = self.zed_root / "assets/locales"
+        bundle = json.loads((directory / "ko-KR.json").read_text(encoding="utf-8"))
+        index = json.loads((directory / "index.json").read_text(encoding="utf-8"))
+        original = "There {} {} {} with the same keystrokes."
+        for count in (1, 2, 5):
+            args = {"0": "is" if count == 1 else "are", "1": str(count),
+                    "2": "binding" if count == 1 else "bindings"}
+            for plan, expected in (
+                (bundle["formats"][original], f"같은 키 입력을 사용하는 키 바인딩이 {count}개 있습니다."),
+                (index["source_formats"][original],
+                 f'There {args["0"]} {count} {args["2"]} with the same keystrokes.'),
+            ):
+                self.assertEqual("".join(
+                    s["text"] if "text" in s else args[s["arg"]] for s in plan
+                ), expected)
+        cargo = self.zed_root / "crates/keymap_editor/Cargo.toml"
+        cargo.write_text(
+            '[package]\nname = "keymap_editor"\nversion = "0.1.0"\n\n[dependencies]\n',
+            encoding="utf-8",
+        )
+        report = apply_universal(self.root, self.zed_root, manifest)
+        self.assertTrue(report.ok)
+        rewritten = source_file.read_text(encoding="utf-8")
+        self.assertIn("localization::format_message(", rewritten)
+        self.assertIn('("1", __zed_i18n_arg_1)', rewritten)
+        self.assertIn('format!("{}", matching_bindings_count)', rewritten)
+        self.assertIn(original, rewritten)
+
+    def test_composite_consumers_reject_stale_producers_and_rule_metadata(self) -> None:
+        from tools.zed_i18n.apply import apply_translations
+        from tools.zed_i18n.apply_universal import build_handling_map
+
+        source_file, source_text, manifest, translations = self._write_keybindings_composite()
+        source_file.write_text(source_text.replace('"is"', '"xx"'), encoding="utf-8")
+        self.assertEqual(
+            apply_translations(self.zed_root, manifest, translations).stale,
+            [KEYBINDINGS_SOURCE],
+        )
+        for check in (
+            lambda: build_handling_map(self.zed_root, manifest),
+            lambda: generate_runtime_bundles(self.root, self.zed_root, self._project()),
+        ):
+            with self.assertRaisesRegex(ValueError, "stale composite message occurrence"):
+                check()
+        source_file.write_text(source_text, encoding="utf-8")
+        manifest[KEYBINDINGS_SOURCE]["occurrences"][0]["composite_rule_id"] = "unknown"
+        self._write_inputs({KEYBINDINGS_SOURCE: KEYBINDINGS_SOURCE}, manifest, translations)
+        for check in (
+            lambda: build_handling_map(self.zed_root, manifest),
+            lambda: generate_runtime_bundles(self.root, self.zed_root, self._project()),
+        ):
+            with self.assertRaisesRegex(ValueError, "stale composite message occurrence"):
+                check()
 
     def test_includes_overlay_format_source_without_a_translation(self) -> None:
         source = "System Default ({language}, {locale})"

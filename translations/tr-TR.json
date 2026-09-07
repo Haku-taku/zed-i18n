@@ -5451,7 +5451,7 @@
   "Themes": "Temalar",
   "Themes…": "Temalar…",
   "There are still conflicts. You must stage these before committing": "Hâlâ çakışmalar var. Commit etmeden önce bunları hazırlamanız gerekir",
-  "There {} {} {} with the same keystrokes.": "Aynı tuş vuruşlarına sahip {} {} {} var.",
+  "There are {} keybindings with the same keystrokes.": "Aynı tuşları kullanan {} tuş bağlaması var.",
   "There’s no active call; join one first.": "Etkin bir sesli görüşme yok; önce birine katılın.",
   "These are not run if formatting is off.": "Biçimlendirme kapalıysa bunlar çalıştırılmaz.",
   "These are populated when choosing \"Allow always\" from a sandbox": "Bunlar, korumalı alan yükseltme iletişim kutusunda \"Her zaman izin ver\"",

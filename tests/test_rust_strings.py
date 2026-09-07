@@ -104,6 +104,18 @@ class RustStringTests(unittest.TestCase):
             )
         )
 
+    def test_keybinding_conflict_requires_composite_processing_to_hide_arguments(self) -> None:
+        source = "There {} {} {} with the same keystrokes."
+        self.assertFalse(
+            rust_format_placeholders_compatible(
+                source, "Nombre de combinaisons utilisant les mêmes touches : {:.0}{}{:.0}."
+            )
+        )
+        self.assertFalse(
+            rust_format_placeholders_compatible(source, "{:.0}{:.0}{}")
+        )
+        self.assertFalse(rust_format_placeholders_compatible(source, "{}"))
+
     def test_rejects_zero_precision_placeholder_for_unlisted_source(self) -> None:
         self.assertFalse(
             rust_format_placeholders_compatible(

@@ -5451,7 +5451,7 @@
   "Themes": "Temas",
   "Themes…": "Temas…",
   "There are still conflicts. You must stage these before committing": "Ainda há conflitos. Você deve prepará-los antes de fazer commit",
-  "There {} {} {} with the same keystrokes.": "Há {} {} {} com as mesmas teclas pressionadas.",
+  "There are {} keybindings with the same keystrokes.": "O número de associações de teclas com as mesmas teclas pressionadas é {}.",
   "There’s no active call; join one first.": "Não há chamada de voz ativa; entre em uma primeiro.",
   "These are not run if formatting is off.": "Estas não são executadas se a formatação estiver desativada.",
   "These are populated when choosing \"Allow always\" from a sandbox": "São preenchidas ao escolher \"Permitir sempre\" em um diálogo de",

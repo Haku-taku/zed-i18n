@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 from typing import Mapping
 
+from .composite_messages import verify_composite_message_occurrence
 from .extract import _title_case_identifier
 from .rust_ast import make_rust_parser, node_text, walk_nodes
 from .rust_strings import parse_rust_string_literal, rust_string_literal
@@ -341,6 +342,8 @@ def build_handling_map(
             kinds.add(kind)
             if start < 0 or end <= start or end > len(source_bytes):
                 raise ValueError(f"stale occurrence span: {relative}:{line}")
+            if "composite_rule_id" in occurrence:
+                verify_composite_message_occurrence(source_bytes, relative, source, occurrence)
             raw = source_bytes[start:end].decode("utf-8")
             node = nodes.get((start, end))
             if (

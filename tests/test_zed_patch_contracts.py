@@ -190,6 +190,13 @@ class ZedPatchContractTests(unittest.TestCase):
             completion_provider,
         )
 
+    def test_clean_extract_checkout_matches_keybindings_composite_contract(self) -> None:
+        relative_path = "crates/keymap_editor/src/keymap_editor.rs"
+        source = (self.resolve_clean_extract_zed_root() / relative_path).read_bytes()
+        matches = find_composite_message_matches(source, relative_path)
+        self.assertEqual([match.rule.id for match in matches], ["keymap.matching_bindings_count"])
+        self.assertEqual(matches[0].rule.visible_args, (1,))
+
 
 if __name__ == "__main__":
     unittest.main()

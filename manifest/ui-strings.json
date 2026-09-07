@@ -88165,15 +88165,17 @@
     ],
     "status": "accepted"
   },
-  "There {} {} {} with the same keystrokes.": {
+  "There are {} keybindings with the same keystrokes.": {
     "occurrences": [
       {
         "call": "Label::new",
+        "composite_rule_id": "keymap.matching_bindings_count",
         "end_byte": 121582,
         "file": "crates/keymap_editor/src/keymap_editor.rs",
         "kind": "label",
         "line": 3124,
-        "start_byte": 121540
+        "start_byte": 121540,
+        "translation_note": "Complete explanatory sentence about keybindings using the same keystrokes in the keybinding editor. The only placeholder is the positive count, not English grammar fragments. Keep sentence form and use wording that works for both one and multiple keybindings (for example, a sentence stating the number of matching keybindings). The English UI retains the original singular/plural branches."
       }
     ],
     "status": "accepted"

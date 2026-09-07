@@ -10,6 +10,7 @@ import tomllib
 from typing import Mapping
 
 from .config import ProjectConfig
+from .composite_messages import CompositeMessageRule, verify_composite_message_occurrence
 from .apply_universal import (
     _IMPLICIT_FORMAT_MACROS,
     _rust_macro_call_spans,
@@ -223,7 +224,7 @@ def generate_runtime_bundles(
     if missing_catalog:
         raise ValueError(f"accepted manifest keys missing from catalog: {missing_catalog[:3]!r}")
 
-    format_sources, format_components, static_catalog_sources = _runtime_format_sources(
+    format_sources, format_components, static_catalog_sources, composite_rules = _runtime_format_sources(
         zed_root, manifest, accepted
     )
     catalog_format_sources = {
@@ -305,6 +306,13 @@ def generate_runtime_bundles(
             ):
                 raise ValueError(f"placeholder mismatch for {locale.id}: {source!r}")
             plan = compile_format_plan(translation, original_source=catalog_source)
+            rule = composite_rules.get(source)
+            if rule is not None:
+                plan = tuple(
+                    {"arg": str(rule.visible_args[int(segment["arg"])])}
+                    if "arg" in segment else segment
+                    for segment in plan
+                )
             formats[_decode_rust_unicode_escapes(source)] = list(plan)
         for group in joined_groups:
             keys = [key for _, key in group if key]
@@ -389,7 +397,7 @@ def _runtime_format_sources(
     zed_root: Path,
     manifest: Mapping[str, object],
     accepted: set[str],
-) -> tuple[set[str], dict[str, tuple[str, ...]], set[str]]:
+) -> tuple[set[str], dict[str, tuple[str, ...]], set[str], dict[str, CompositeMessageRule]]:
     occurrences_by_file: dict[str, list[tuple[str, dict[str, object]]]] = defaultdict(list)
     for source in accepted:
         entry = manifest[source]
@@ -405,6 +413,7 @@ def _runtime_format_sources(
     format_sources: set[str] = set()
     format_components: dict[str, tuple[str, ...]] = {}
     static_catalog_sources: set[str] = set()
+    composite_rules: dict[str, CompositeMessageRule] = {}
 
     def add_format(runtime_source: str, catalog_components: tuple[str, ...]) -> None:
         previous = format_components.get(runtime_source)
@@ -438,6 +447,11 @@ def _runtime_format_sources(
         tree = parser.parse(source_bytes)
         nodes = {(node.start_byte, node.end_byte): node for node in walk_nodes(tree.root_node)}
         for source, occurrence in occurrences:
+            composite_rule = None
+            if "composite_rule_id" in occurrence:
+                composite_rule = verify_composite_message_occurrence(
+                    source_bytes, relative, source, occurrence
+                )
             if occurrence.get("kind") in _METADATA_KINDS:
                 static_catalog_sources.add(source)
                 continue
@@ -465,6 +479,8 @@ def _runtime_format_sources(
                             )
                             catalog_components = (source,) if len(components) == 1 else components
                             add_format(format_source, catalog_components)
+                            if composite_rule is not None:
+                                composite_rules[format_source] = composite_rule
                             is_runtime_format = True
                         break
                 if parent.type == "attribute_item" and re.match(
@@ -553,7 +569,7 @@ def _runtime_format_sources(
                 )
                 if format_source in accepted and "{" in format_source:
                     add_format(format_source, (format_source,))
-    return format_sources, format_components, static_catalog_sources
+    return format_sources, format_components, static_catalog_sources, composite_rules
 
 
 def _decode_rust_unicode_escapes(value: str) -> str:

@@ -5451,7 +5451,7 @@
   "Themes": "Motivy",
   "Themes…": "Motivy…",
   "There are still conflicts. You must stage these before committing": "Stále existují konflikty. Před vytvořením commitu je musíte připravit ke commitu",
-  "There {} {} {} with the same keystrokes.": "{} {} {} se stejnými klávesovými zkratkami.",
+  "There are {} keybindings with the same keystrokes.": "Počet klávesových zkratek se stejnými stisky kláves je {}.",
   "There’s no active call; join one first.": "Není aktivní žádný hovor; nejprve se k nějakému připojte.",
   "These are not run if formatting is off.": "Tyto se nespouštějí, pokud je formátování vypnuté.",
   "These are populated when choosing \"Allow always\" from a sandbox": "Vyplňují se při volbě „Vždy povolit“ ve výzvě sandboxu",

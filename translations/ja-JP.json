@@ -5451,7 +5451,7 @@
   "Themes": "テーマ",
   "Themes…": "テーマ…",
   "There are still conflicts. You must stage these before committing": "まだ競合があります。コミットする前にこれらをステージする必要があります",
-  "There {} {} {} with the same keystrokes.": "同じキーストロークのキーバインドが {} {} {} あります。",
+  "There are {} keybindings with the same keystrokes.": "同じキーストロークのキーバインドが {} 件あります。",
   "There’s no active call; join one first.": "アクティブな通話がありません。先に通話に参加してください。",
   "These are not run if formatting is off.": "フォーマットがオフの場合は実行されません。",
   "These are populated when choosing \"Allow always\" from a sandbox": "サンドボックスの権限昇格確認で「常に許可」を選択すると、",

@@ -5451,7 +5451,7 @@
   "Themes": "主题",
   "Themes…": "主题…",
   "There are still conflicts. You must stage these before committing": "仍存在冲突。提交前必须先暂存这些更改",
-  "There {} {} {} with the same keystrokes.": "有 {} {} {} 具有相同的按键",
+  "There are {} keybindings with the same keystrokes.": "有 {} 个键绑定使用相同的按键",
   "There’s no active call; join one first.": "当前没有进行中的通话，先加入一个。",
   "These are not run if formatting is off.": "若格式化已关闭，这些操作不会运行",
   "These are populated when choosing \"Allow always\" from a sandbox": "在沙盒权限提升提示中选择“始终允许”时会填充",

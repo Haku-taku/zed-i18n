@@ -16,7 +16,11 @@ from .apply_universal import (
     _token_tree_arguments,
 )
 from .rust_ast import make_rust_parser, node_text, walk_nodes
-from .rust_strings import parse_rust_string_literal, rust_format_placeholders_compatible
+from .rust_strings import (
+    parse_rust_string_literal,
+    rust_format_placeholders,
+    rust_format_placeholders_compatible,
+)
 
 
 BUNDLE_SCHEMA_VERSION = 1
@@ -131,8 +135,22 @@ def release_locale_ids(root: Path) -> list[str]:
     )
 
 
-def compile_format_plan(source: str) -> tuple[FormatSegment, ...]:
+def compile_format_plan(
+    source: str, *, original_source: str | None = None
+) -> tuple[FormatSegment, ...]:
     source = _decode_rust_unicode_escapes(source)
+    original_specs: dict[str, str] = {}
+    if original_source is not None:
+        original_source = _decode_rust_unicode_escapes(original_source)
+        if not rust_format_placeholders_compatible(original_source, source):
+            raise ValueError(f"placeholder mismatch: {original_source!r}")
+        original_implicit_index = 0
+        for placeholder in rust_format_placeholders(original_source):
+            key, _, spec = placeholder[1:-1].partition(":")
+            if not key:
+                key = str(original_implicit_index)
+                original_implicit_index += 1
+            original_specs[key] = spec
     segments: list[FormatSegment] = []
     text: list[str] = []
     implicit_index = 0
@@ -173,7 +191,10 @@ def compile_format_plan(source: str) -> tuple[FormatSegment, ...]:
         elif not argument.isdecimal() and not _is_rust_identifier(argument):
             raise ValueError(f"unsupported format argument {argument!r} in {source!r}")
         flush_text()
-        segments.append({"arg": argument})
+        # Arguments are already formatted in Rust using the original template.
+        # Only an allowed translation-only .0 hides a string argument here.
+        if not (format_spec == ".0" and original_specs.get(argument) == ""):
+            segments.append({"arg": argument})
         index = end + 1
 
     flush_text()
@@ -283,9 +304,8 @@ def generate_runtime_bundles(
                 source, catalog_source, translation
             ):
                 raise ValueError(f"placeholder mismatch for {locale.id}: {source!r}")
-            formats[_decode_rust_unicode_escapes(source)] = list(
-                compile_format_plan(translation)
-            )
+            plan = compile_format_plan(translation, original_source=catalog_source)
+            formats[_decode_rust_unicode_escapes(source)] = list(plan)
         for group in joined_groups:
             keys = [key for _, key in group if key]
             if not all(key in translations for key in keys):

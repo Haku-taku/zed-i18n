@@ -89,6 +89,55 @@ enabled = true
             ({"text": "\N{EM DASH} Modified in "}, {"arg": "place"}),
         )
 
+    def test_zero_precision_suppression_keeps_source_numeric_formats(self) -> None:
+        self.assertEqual(
+            compile_format_plan("{:.0}%", original_source="{:.0}%"),
+            ({"arg": "0"}, {"text": "%"}),
+        )
+        self.assertEqual(
+            compile_format_plan("Show {} warning{}"),
+            ({"text": "Show "}, {"arg": "0"}, {"text": " warning"}, {"arg": "1"}),
+        )
+        self.assertEqual(
+            compile_format_plan("Zobrazit {} varování{:.0}", original_source="Show {} warning{}"),
+            ({"text": "Zobrazit "}, {"arg": "0"}, {"text": " varování"}),
+        )
+        with self.assertRaisesRegex(ValueError, "placeholder mismatch"):
+            compile_format_plan("{:.0} warning{}", original_source="Show {} warning{}")
+
+    def test_generated_bundle_suppresses_only_translated_grammar_arguments(self) -> None:
+        source = "Show {} warning{}"
+        prefix = 'fn message(count: usize) -> String { format!('
+        literal = json.dumps(source)
+        source_file = self.zed_root / "crates/sample/src/lib.rs"
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(
+            prefix + literal + ', count, if count == 1 { "" } else { "s" }) }\n',
+            encoding="utf-8",
+        )
+        self._write_inputs(
+            {source: source},
+            {source: {
+                "status": "accepted",
+                "occurrences": [self._occurrence(
+                    line=1, start=len(prefix), end=len(prefix) + len(literal),
+                    call="format!", kind="label",
+                )],
+            }},
+            {source: "경고 {}개 표시{:.0}"},
+        )
+        generate_runtime_bundles(self.root, self.zed_root, self._project())
+        directory = self.zed_root / "assets/locales"
+        bundle = json.loads((directory / "ko-KR.json").read_text(encoding="utf-8"))
+        index = json.loads((directory / "index.json").read_text(encoding="utf-8"))
+        self.assertEqual(
+            [s["arg"] for s in bundle["formats"][source] if "arg" in s], ["0"]
+        )
+        self.assertEqual(
+            [s["arg"] for s in index["source_formats"][source] if "arg" in s],
+            ["0", "1"],
+        )
+
     def test_rejects_dynamic_width_and_precision(self) -> None:
         for source in ("{value:width$}", "{value:.*}"):
             with self.subTest(source=source):

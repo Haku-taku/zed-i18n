@@ -16,6 +16,7 @@ instead of skipping when the checkout is unavailable.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import unittest
@@ -96,6 +97,22 @@ class UniversalApplyContractTests(unittest.TestCase):
         config = load_distribution_config(self.root / "config" / "distribution.toml")
         apply_distribution_patches(self.zed_root, config)
         apply_distribution_patches(self.zed_root, config)
+
+        settings_content = (
+            self.zed_root / "crates/settings_content/src/settings_content.rs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("pub ui_locale: Option<UiLocale>", settings_content)
+        deserialize_options = re.search(
+            r"flattened_deserialize!\(SettingsContent\s*\{\s*"
+            r"sections:\s*\{[^}]*\},\s*options:\s*\{([^}]*)\}",
+            settings_content,
+        )
+        self.assertIsNotNone(deserialize_options)
+        self.assertEqual(
+            re.findall(r"\bui_locale\b", deserialize_options.group(1)),
+            ["ui_locale"],
+            "The UI locale must be deserialized and initialized with the other settings",
+        )
 
         app_menus = (
             self.zed_root / "crates" / "zed" / "src" / "zed" / "app_menus.rs"

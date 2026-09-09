@@ -538,6 +538,11 @@ impl JsonSchema for UiLocale {
     pub feature_flags: Option<FeatureFlagsMap>,''',
     )
     patch(
+        "crates/settings_content/src/settings_content.rs",
+        "        title_bar, vim_mode, calls, which_key, vim, modeline_lines, feature_flags,",
+        "        title_bar, vim_mode, calls, which_key, vim, modeline_lines, ui_locale, feature_flags,",
+    )
+    patch(
         "assets/settings/default.json",
         '  "$schema": "zed://schemas/settings",\n',
         '  "$schema": "zed://schemas/settings",\n  "ui_locale": "system",\n',

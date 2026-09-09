@@ -1498,7 +1498,7 @@ gzip -f --stdout --best target/$target_triple/release/remote_server > target/zed
             """
 function BuildRemoteServer {
     Write-Output "Building remote_server for $target"
-    cargo build --release --package remote_server --target $target
+    cargo --config .cargo/bundle-config.toml build --release --package remote_server --target $target
 
     # Create zipped remote server binary
     $remoteServerSrc = (Resolve-Path ".\\$CargoOutDir\\remote_server.exe").Path

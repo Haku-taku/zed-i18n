@@ -127,7 +127,8 @@ class RuntimeOverlayPatchTests(unittest.TestCase):
         self.assertIn("localization::translate_static", self._read("crates/keymap_editor/src/keymap_editor.rs"))
 
         dropdown = self._read("crates/settings_ui/src/components/dropdown.rs")
-        self.assertIn("let current_value_index", dropdown)
+        self.assertIn("window.use_keyed_state(self.selected_index, cx,", dropdown)
+        self.assertNotIn("window.use_keyed_state(current_value_label, cx,", dropdown)
         self.assertIn("localization::lookup(&display_source)", dropdown)
         self.assertIn(".or_else(|| localization::lookup(label))", dropdown)
         settings_ui = self._read("crates/settings_ui/src/settings_ui.rs")

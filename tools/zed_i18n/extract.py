@@ -523,12 +523,12 @@ LANGUAGE_MODEL_PROVIDER_INLINE_DESCRIPTION_SOURCES = {
     "Sign in with your ChatGPT Plus or Pro subscription to use OpenAI models in Zed's agent.",
     "Sign in to have access to Zed's complete agentic experience with hosted models.",
     "You have access to Zed's hosted models through your Pro subscription.",
-    "You have access to Zed's hosted models through your Pro trial.",
+    "Your Pro trial includes $5 of GPT Luna and unlimited edit predictions for 14 days from trial start.",
     "You have access to Zed's hosted models through your Student subscription.",
     "You have access to Zed's hosted models through your organization.",
     "Zed's hosted models are disabled by your organization's configuration.",
     "You have access to Zed's hosted models through your VIP subscription.",
-    "Subscribe for access to Zed's hosted models. Start with a 14 day free trial.",
+    "Start a free trial with $5 of GPT Luna and unlimited edit predictions for 14 days from trial start.",
     "Subscribe for access to Zed's hosted models.",
 }
 
@@ -2183,6 +2183,14 @@ def _allowed_literal_rules_for_path(
     relative_path: str,
 ) -> list[tuple[set[str], str, str]]:
     rules: list[tuple[set[str], str, str]] = []
+    if relative_path == "crates/workspace/src/workspace.rs":
+        rules.append(
+            (
+                {"copy file permalink", "open file permalink"},
+                "status_toast_fragment",
+                "show_file_permalink.action",
+            )
+        )
     if relative_path == "crates/agent/src/tools/ask_user_tool.rs":
         rules.append(
             (

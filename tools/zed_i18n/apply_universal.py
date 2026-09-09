@@ -729,21 +729,12 @@ fn localize_schema_metadata(value: &mut serde_json::Value) {
 
     patch(
         "crates/settings_ui/src/components/dropdown.rs",
-        '''        let current_value_label = self.labels[self
-            .variants
-            .iter()
-            .position(|v| *v == self.current_value)
-            .unwrap()];
+        '''        let current_value_label = self.labels[self.selected_index];
 
         let context_menu = window.use_keyed_state(current_value_label, cx, |window, cx| {''',
-        '''        let current_value_index = self
-            .variants
-            .iter()
-            .position(|value| *value == self.current_value)
-            .unwrap();
-        let current_value_label = self.labels[current_value_index];
+        '''        let current_value_label = self.labels[self.selected_index];
 
-        let context_menu = window.use_keyed_state(current_value_index, cx, |window, cx| {''',
+        let context_menu = window.use_keyed_state(self.selected_index, cx, |window, cx| {''',
     )
     patch(
         "crates/settings_ui/src/components/dropdown.rs",
@@ -765,7 +756,7 @@ fn localize_schema_metadata(value: &mut serde_json::Value) {
     )
     patch(
         "crates/settings_ui/src/components/dropdown.rs",
-        "#[derive(IntoElement)]\npub struct EnumVariantDropdown<T>",
+        "#[derive(IntoElement)]\npub struct EnumVariantDropdown {",
         '''fn translated_enum_label(label: &str, title_case: bool) -> String {
     let display_source = if title_case {
         label.to_title_case()
@@ -783,7 +774,7 @@ fn localize_schema_metadata(value: &mut serde_json::Value) {
 }
 
 #[derive(IntoElement)]
-pub struct EnumVariantDropdown<T>''',
+pub struct EnumVariantDropdown {''',
     )
 
     patch(

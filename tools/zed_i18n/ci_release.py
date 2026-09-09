@@ -765,7 +765,7 @@ def patch_windows_remote_server_build(path: Path) -> None:
     script = script.replace(
         """function BuildRemoteServer {
     Write-Output "Building remote_server for $target"
-    cargo build --release --package remote_server --target $target
+    cargo --config .cargo/bundle-config.toml build --release --package remote_server --target $target
 
     # Create zipped remote server binary
     $remoteServerSrc = (Resolve-Path ".\\$CargoOutDir\\remote_server.exe").Path

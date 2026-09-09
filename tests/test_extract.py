@@ -4430,6 +4430,12 @@ class ExtractTests(unittest.TestCase):
                 "fn zed_ai_description() -> &'static str {",
                 '    "You have access to Zed\'s hosted models through your Pro subscription."',
                 "}",
+                "fn trial_description() -> &'static str {",
+                '    "Your Pro trial includes $5 of GPT Luna and unlimited edit predictions for 14 days from trial start."',
+                "}",
+                "fn trial_offer_description() -> &'static str {",
+                '    "Start a free trial with $5 of GPT Luna and unlimited edit predictions for 14 days from trial start."',
+                "}",
             ]
         )
 
@@ -4447,6 +4453,8 @@ class ExtractTests(unittest.TestCase):
                 "Requires an active GitHub Copilot subscription.",
                 "Configure ChatGPT",
                 "You have access to Zed's hosted models through your Pro subscription.",
+                "Your Pro trial includes $5 of GPT Luna and unlimited edit predictions for 14 days from trial start.",
+                "Start a free trial with $5 of GPT Luna and unlimited edit predictions for 14 days from trial start.",
             },
         )
         self.assertEqual(
@@ -5183,6 +5191,24 @@ class ExtractTests(unittest.TestCase):
             },
         )
         self.assertEqual(by_source["Testing"].kind, "prediction_trigger_label")
+
+    def test_extracts_file_permalink_error_fragments_only_in_workspace(self) -> None:
+        source = '''fn show_file_permalink(copy: bool) {
+            let action = if copy { "copy file permalink" } else { "open file permalink" };
+            let internal_id = "file-permalink-action";
+        }'''
+        occurrences = extract_ui_strings_from_source(
+            source, relative_path="crates/workspace/src/workspace.rs"
+        )
+        self.assertEqual(
+            {item.source for item in occurrences},
+            {"copy file permalink", "open file permalink"},
+        )
+        self.assertTrue(all(item.kind == "status_toast_fragment" for item in occurrences))
+        self.assertEqual(
+            extract_ui_strings_from_source(source, relative_path="crates/other/src/lib.rs"),
+            [],
+        )
 
     def test_extracts_workspace_error_actions(self) -> None:
         source = "\n".join(

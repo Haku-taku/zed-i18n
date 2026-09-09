@@ -16,7 +16,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | Punkt przerwania |
 | Call | voice / collaboration | Połączenie |
 | Call | tool / function / API | Wywołanie |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | hierarchia wywołań |
 | Chat | | Czat |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | Strzałka |
 | Command Palette | | Paleta poleceń |
 | Commit | Git object (noun) | Zatwierdzenie |
 | Commit | Git command (verb) | Zatwierdź |
@@ -53,6 +55,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | Panel |
 | Patch | | Poprawka |
 | Path | | Ścieżka |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | trwały link |
 | Preview | file / Markdown / UI preview / preview tab or mode | Podgląd |
 | Preview | command/action label (Preview X) | Wyświetl podgląd |
 | Preview | release channel / build | Wersja zapoznawcza |
@@ -81,9 +84,11 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | Serwer |
 | Session | | Sesja |
 | Settings | | Ustawienia |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | płytki klon |
 | Sign In | | Zaloguj się |
 | Sign Out | | Wyloguj się |
 | Skill | Agent Skills feature | Umiejętność |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | migawka |
 | Snippet | | Fragment kodu |
 | Split | DiffViewStyle setting option paired with Unified / compact label; not Split Up/Down commands | Podzielony |
 | Stage | Git command / action label | Przygotuj |

@@ -16,7 +16,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | 中斷點 |
 | Call | voice / collaboration | 通話 |
 | Call | tool / function / API | 呼叫 |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | 呼叫階層 |
 | Chat | | 聊天 |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | 展開箭頭 |
 | Code Lens | editor feature / LSP code lens concept | Code Lens |
 | Command Palette | | 命令選擇區 |
 | Commit | | 提交 |
@@ -50,6 +52,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | 面板 |
 | Patch | | 修補檔 |
 | Path | | 路徑 |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | 永久連結 |
 | Preview | | 預覽 |
 | Preview | Zed release channel / build name | Preview |
 | Problem | diagnostics / generic | 問題 |
@@ -74,9 +77,11 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | 伺服器 |
 | Session | | 工作階段 |
 | Settings | | 設定 |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | 淺層複製 |
 | Sign In | | 登入 |
 | Sign Out | | 登出 |
 | Skill | Agent Skills feature | 技能 |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | 快照 |
 | Snippet | | 程式碼片段 |
 | Stage | Git command / action label | 暫存 |
 | Staged | Git status adjective | 已暫存 |

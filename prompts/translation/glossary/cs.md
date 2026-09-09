@@ -16,7 +16,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | Zarážka |
 | Call | voice / collaboration | Hovor |
 | Call | tool / function / API | Volání |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | hierarchie volání |
 | Chat | | Chat |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | Šipka |
 | Command Palette | | Paleta příkazů |
 | Commit | | Commit |
 | Completion | editor autocomplete | Dokončování |
@@ -49,6 +51,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | Panel |
 | Patch | | Oprava |
 | Path | | Cesta |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | trvalý odkaz |
 | Preview | file / Markdown / UI preview / preview tab or mode | Náhled |
 | Preview | command/action label (Preview X) | Zobrazit náhled |
 | Preview | Zed release channel / build name | Preview |
@@ -77,9 +80,11 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | Server |
 | Session | | Relace |
 | Settings | | Nastavení |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | mělký klon |
 | Sign In | | Přihlásit se |
 | Sign Out | | Odhlásit se |
 | Skill | Agent Skills feature | Dovednost |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | snímek |
 | Snippet | | Fragment |
 | Split | DiffViewStyle setting option paired with Unified / compact label; not Split Up/Down commands | Rozdělené |
 | Stage | Git command / action label | Připravit ke commitu |

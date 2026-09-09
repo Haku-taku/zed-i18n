@@ -66,7 +66,7 @@ Use `null` as a review signal for strings that are not safe to translate.
 - Capitalization: sentence case — only the first word and proper nouns are capitalized. Never use English-style title case (`Otwórz ustawienia`, NOT `Otwórz Ustawienia`).
 - Always use proper Polish diacritics: ą, ć, ę, ł, ń, ó, ś, ź, ż. Never substitute (e.g., `ścieżka` not `sciezka`, `rozszerzenie` not `rozszerzenie` without diacritics).
 - Polish has 7 grammatical cases (mianownik, dopełniacz, celownik, biernik, narzędnik, miejscownik, wołacz). When a placeholder represents a noun and the surrounding text demands a specific case, prefer rewrites that put the placeholder in nominative or accusative position so the sentence reads naturally regardless of the inserted word's grammatical form.
-- Polish has 3 plural categories (1; 2-4 ending; 5+ ending). When count-aware translations are needed, the source typically lacks plural forms — prefer phrasings that avoid count-dependent number agreement (e.g., `{count} elementów` is safe across counts; `1 element / 2 elementy / 5 elementów` requires count-dependent logic and should be avoided).
+- For integer counts in a simple number-noun phrase, Polish uses `1 element`, `2-4 elementy`, and `5-21 elementów`; numbers ending in 2-4 use `elementy` except those ending in 12-14 (e.g., `22 elementy`, `112 elementów`). A `count > 1` condition does not remove this distinction. When the source has no count-dependent forms, use a count label such as `Liczba elementów: {count}` or `(liczba wywołań: {})`. Neither `{count} elementów` nor `{count} elementy` is safe for every count. Check the grammatical case of the whole phrase: prepositions and action nouns may govern a different case, so do not mechanically rewrite every counted noun.
 - Match length to UI context. Buttons stay tight, descriptions can breathe.
 - Do not add explanations that are not present in the source.
 - Preserve source punctuation intent, but adapt naturally for Polish UI.
@@ -136,7 +136,7 @@ When `vscode_references` are present, use them to understand established develop
 5. Polish diacritics (ą, ć, ę, ł, ń, ó, ś, ź, ż) are present where required — never substituted.
 6. Sentence case is used — no English-style title case.
 7. No 2nd person address; no `proszę` unless the source contains "please".
-8. Placeholder positions read naturally given Polish case requirements; count-dependent plural forms are avoided where possible.
+8. Placeholder positions read naturally given Polish case requirements. For variable integer counts, check 2, 5, 12, 21, 22, and 112; use count-label phrasing when the source cannot select the required forms, even when it guarantees `count > 1`.
 9. Appended glossary terms and disambiguation rules are applied consistently, with source context taking priority.
 10. Glossary terms were not used as blind replacements; grammatical role and UI role were checked first.
 11. VS Code references were considered as hints only, not mandatory replacements.

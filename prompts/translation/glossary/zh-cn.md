@@ -15,7 +15,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | 断点 |
 | Call | voice / collaboration | 通话 |
 | Call | tool / function / API | 调用 |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | 调用层次结构 |
 | Chat | | 聊天 |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | 箭头 |
 | Command Palette | | 命令面板 |
 | Commit | | 提交 |
 | Completion | editor autocomplete | 补全 |
@@ -48,6 +50,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | 面板 |
 | Patch | | 补丁 |
 | Path | | 路径 |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | 永久链接 |
 | Preview | | 预览 |
 | Problem | diagnostics / generic | 问题 |
 | Profile | | 配置文件 |
@@ -71,9 +74,11 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | 服务器 |
 | Session | | 会话 |
 | Settings | | 设置 |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | 浅克隆 |
 | Sign In | | 登录 |
 | Sign Out | | 注销 |
 | Skill | Agent Skills feature | 技能 |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | 快照 |
 | Snippet | | 代码片段 |
 | Stage | Git command / action label | 暂存 |
 | Staged | Git status adjective | 已暂存 |

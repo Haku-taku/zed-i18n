@@ -16,7 +16,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | Ponto de interrupção |
 | Call | voice / collaboration | Chamada de voz |
 | Call | tool / function / API | Chamada |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | hierarquia de chamadas |
 | Chat | | Chat |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | Seta |
 | Command Palette | | Paleta de comandos |
 | Commit | | Commit |
 | Completion | editor autocomplete | Preenchimento automático |
@@ -50,6 +52,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | Painel |
 | Patch | | Patch |
 | Path | | Caminho |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | link permanente |
 | Preview | file / Markdown / UI preview / preview tab or mode | Visualização |
 | Preview | command/action label (Preview X) | Visualizar |
 | Preview | Zed release channel / build name | Preview |
@@ -78,9 +81,13 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | Servidor |
 | Session | | Sessão |
 | Settings | | Configurações |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | clone raso |
+| Show Callees | Call hierarchy picker: expand callees of the selected item; distinct from Show Outgoing Calls | Mostrar funções chamadas |
+| Show Callers | Call hierarchy picker: expand callers of the selected item; distinct from Show Incoming Calls | Mostrar funções chamadoras |
 | Sign In | | Entrar |
 | Sign Out | | Sair |
 | Skill | Agent Skills feature | habilidade |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | snapshot |
 | Snippet | | Trecho |
 | Split | DiffViewStyle setting option paired with Unified / compact label; not Split Up/Down commands | Dividido |
 | Stage | Git command / action label | Preparar |

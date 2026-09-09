@@ -17,7 +17,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Buffer | editor buffer | 버퍼 |
 | Call | voice / collaboration | 통화 |
 | Call | tool / function / API | 호출 |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | 호출 계층 |
 | Chat | | 채팅 |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | 화살표 |
 | Command Palette | | 명령 팔레트 |
 | Commit | | 커밋 |
 | Commit View | named Git UI view / screen | 커밋 뷰 |
@@ -55,6 +57,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | 패널 |
 | Patch | | 패치 |
 | Path | | 경로 |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | 고유 링크 |
 | Preview | file / Markdown / UI preview / preview tab or mode | 미리 보기 |
 | Preview | Zed release channel / build name | Preview |
 | Problem | diagnostics / generic | 문제 |
@@ -80,9 +83,11 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | 서버 |
 | Session | | 세션 |
 | Settings | | 설정 |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | 얕은 복제 |
 | Sign In | | 로그인 |
 | Sign Out | | 로그아웃 |
 | Skill | Agent Skills feature | 스킬 |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | 스냅샷 |
 | Snippet | | 스니펫 |
 | Stage | Git command / action label | 스테이징 |
 | Staged | Git status adjective | 스테이징된 |

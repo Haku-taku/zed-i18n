@@ -16,7 +16,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | Punto de interrupción |
 | Call | voice / collaboration | Llamada |
 | Call | tool / function / API | Llamada |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | jerarquía de llamadas |
 | Chat | | Chat |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | Flecha de despliegue |
 | Command Palette | | Paleta de comandos |
 | Commit | | Commit |
 | Completion | editor autocomplete | Autocompletado |
@@ -50,6 +52,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | Panel |
 | Patch | | Parche |
 | Path | | Ruta |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | enlace permanente |
 | Preview | file / Markdown / UI preview | Vista previa |
 | Preview | command/action label (Preview X) | Previsualizar |
 | Preview | release channel / build | Versión preliminar |
@@ -78,9 +81,13 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | Servidor |
 | Session | | Sesión |
 | Settings | | Configuración |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | clon superficial |
+| Show Callees | Call hierarchy picker: expand callees of the selected item; distinct from Show Outgoing Calls | Mostrar funciones llamadas |
+| Show Callers | Call hierarchy picker: expand callers of the selected item; distinct from Show Incoming Calls | Mostrar funciones llamadoras |
 | Sign In | | Iniciar sesión |
 | Sign Out | | Cerrar sesión |
 | Skill | Agent Skills feature | Habilidad |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | instantánea |
 | Snippet | | Fragmento de código |
 | Split | DiffViewStyle setting option paired with Unified / compact label; not Split Up/Down commands | Dividida |
 | Stage | Git command / action label | Preparar |

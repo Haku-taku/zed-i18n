@@ -67,7 +67,7 @@ Use `null` as a review signal for strings that are not safe to translate.
 - Use proper Cyrillic letters (а, б, в, …, я). Use the letter `ё` where required (e.g., `всё`, `ещё`); do not substitute with `е`.
 - Use Russian-style guillemets « » for quoted content in prose; keep straight quotes in UI labels and for code/identifier emphasis.
 - Russian has 6 cases (именительный, родительный, дательный, винительный, творительный, предложный). When a placeholder is followed by a case-marked word, prefer rewrites that put the placeholder in nominative form: `Файл {path} удалён` rather than constructions that force the placeholder into an inflected form.
-- Russian has 3 plural categories (1; 2–4; 5+). Pluralization is hard with placeholders — prefer phrasings like `Файлов: {count}` or `Количество файлов: {count}` over count-dependent agreement.
+- Russian integer counts require different noun forms (e.g., `1 файл`, `2 файла`, `5 файлов`, `11 файлов`, `21 файл`, `22 файла`). When the source has no count-dependent forms, prefer `Файлов: {count}` or `Количество файлов: {count}`. For Git bulk-file action labels, use the action followed by `(файлов: {count})`, for example `Внести в индекс (файлов: {count})`. This is the house style for these count-bearing action labels, not a rule to turn ordinary sentences into parenthetical labels.
 - Match length to UI context. Buttons stay tight, descriptions can breathe.
 - When a placeholder appears mid-sentence, adjust word order so the sentence reads naturally: `Failed to save {path}` → `Не удалось сохранить {path}`.
 - Do not add explanations that are not present in the source.

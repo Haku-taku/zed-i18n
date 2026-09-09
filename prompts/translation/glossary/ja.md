@@ -16,7 +16,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | ブレークポイント |
 | Call | voice / collaboration | 通話 |
 | Call | tool / function / API | 呼び出し |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | 呼び出し階層 |
 | Chat | | チャット |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | シェブロン |
 | Command Palette | | コマンドパレット |
 | Commit | | コミット |
 | Completion | editor autocomplete | 補完 |
@@ -52,6 +54,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | パネル |
 | Patch | | パッチ |
 | Path | | パス |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | パーマリンク |
 | Preview | | プレビュー |
 | Problem | diagnostics / generic | 問題 |
 | Profile | | プロファイル |
@@ -72,9 +75,11 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | サーバー |
 | Session | | セッション |
 | Settings | | 設定 |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | シャロークローン |
 | Sign In | | サインイン |
 | Sign Out | | サインアウト |
 | Skill | Agent Skills feature | スキル |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | スナップショット |
 | Snippet | | スニペット |
 | Stage | Git command / action label | ステージ |
 | Stage | Git index / staging area noun | ステージングエリア |

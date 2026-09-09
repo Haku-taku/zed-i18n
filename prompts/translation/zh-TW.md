@@ -61,7 +61,7 @@ Use `null` as a review signal for strings that are not safe to translate.
 **General style rules**
 - Use Traditional Chinese characters (繁體中文) and Taiwan-specific vocabulary throughout. Never emit Simplified characters or Mainland Chinese terms (e.g., use `軟體` not `軟件`/`软件`, `檔案` not `文件`, `資料夾` not `文件夹`, `視窗` not `窗口`, `程式` not `程序`, `滑鼠` not `鼠标`, `預設` not `默认`, `儲存` not `保存`, `搜尋` not `搜索`, `網路` not `網絡`/`网络`, `字型` not `字体`).
 - Traditional Chinese (Taiwan) UI text is naturally concise — aim for 2–6 characters for button labels.
-- Insert a half-width space between Chinese characters and adjacent Latin text, digits, or placeholders: `開啟 Zed 設定`, `共 {count} 個檔案`, `在 Finder 中顯示`.
+- Insert a half-width space between Chinese characters and adjacent Latin text or digits: `開啟 Zed 設定`, `共 {count} 個檔案`, `在 Finder 中顯示`. For placeholders, inspect the substituted content and the assembled sentence. Keep separation around data such as counts, names, and paths when adjacent to Chinese text; do not insert spaces between a translated Chinese sentence fragment and surrounding Chinese text merely because the fragment is supplied through a placeholder.
 - No space between Chinese characters and Chinese punctuation.
 - Use Chinese punctuation in sentences (，、。！？；：「」『』) but Western punctuation in labels and short phrases. Use `「」` for primary quotes and `『』` for nested quotes (Taiwan convention) — do not use `""` or `''` as Chinese quotes.
 - Do NOT add subjects (你、您) unless the source explicitly uses "you" in a way that requires it. Avoid `您` even in polite contexts — Taiwan UI practice typically omits the subject entirely.
@@ -87,6 +87,7 @@ The glossary table handles the term choices; only rules it cannot carry remain h
 - **Settings / Default**: 設定 / 預設 (Taiwan); never 设置 / 默认 (Mainland).
 - **Network / Connection**: 網路 / 連線 (Taiwan); never 网络 / 连接 (Mainland).
 - **Font / Video / Image**: 字型 / 影片 / 影像 (Taiwan); never 字体 / 视频 / 图像 (Mainland in this sense).
+- **Composed file-permalink failure toast**: Keep `Failed to {action}: {err}` as `{action}失敗：{err}`. In `handle_file_permalink`, `{action}` is the translated fragment `複製檔案永久連結` or `開啟檔案永久連結`, so the result is `複製檔案永久連結失敗：{err}` or `開啟檔案永久連結失敗：{err}`. Do not add a space before `失敗` during a placeholder-spacing sweep. The full-width colon separates the error payload without an added space. Recheck this rule if the caller starts supplying other kinds of action values.
 
 ## INPUT FORMAT
 
@@ -135,7 +136,7 @@ When `vscode_references` are present, use them to understand established develop
 3. Every placeholder, backtick span, URL, path, and product name is preserved unchanged.
 4. Buttons are short (2–6 characters). Descriptions read naturally in Traditional Chinese (Taiwan).
 5. All characters are Traditional, and Taiwan-specific vocabulary is used (檔案/資料夾/視窗/設定/儲存/搜尋/網路/預設/軟體/程式/滑鼠/字型/影片), never Simplified or Mainland forms.
-6. Half-width spaces exist between Chinese text and adjacent Latin/digit/placeholder characters.
+6. Half-width spaces separate Chinese text from adjacent Latin text, digits, and data placeholders where appropriate. Check composed strings after substitution: translated Chinese fragments join surrounding Chinese text without extra spaces; full-width punctuation needs no added space.
 7. Appended glossary terms and disambiguation rules are applied consistently, with source context taking priority.
 8. Glossary terms were not used as blind replacements; grammatical role and UI role were checked first.
 9. VS Code references were considered as hints only, not mandatory replacements; any Simplified-character or Mainland-vocabulary reference was rejected.

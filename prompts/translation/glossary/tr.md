@@ -16,7 +16,9 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Breakpoint | | Kesme noktası |
 | Call | voice / collaboration | Sesli görüşme |
 | Call | tool / function / API | Çağrı |
+| Call Hierarchy | Code navigation through callers and callees; not voice calls or the debugger call stack | çağrı hiyerarşisi |
 | Chat | | Sohbet |
+| Chevron | FolderIndicator setting option for the folder expand/collapse marker; keep related disclosure-chevron descriptions consistent | Şevron |
 | Command Palette | | Komut paleti |
 | Commit | | Commit |
 | Completion | editor autocomplete | Tamamlama |
@@ -49,6 +51,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Panel | named Zed panel | Panel |
 | Patch | | Yama |
 | Path | | Yol |
+| Permalink | Git hosting link pinned to a specific commit, file, line, or selection | kalıcı bağlantı |
 | Preview | file / Markdown / UI preview / preview tab or mode | Önizleme |
 | Preview | command/action label (Preview X) | Önizle |
 | Preview | Zed release channel / build name | Preview |
@@ -75,9 +78,11 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Server | | Sunucu |
 | Session | | Oturum |
 | Settings | | Ayarlar |
+| Shallow Clone | Git clone with truncated commit history; distinct from partial clone object filtering | sığ klon |
 | Sign In | | Oturum aç |
 | Sign Out | | Oturumu kapat |
 | Skill | Agent Skills feature | Beceri |
+| Snapshot | Git commit view: full file contents at that commit displayed as added; not a restore action | anlık görüntü |
 | Snippet | | Kod parçacığı |
 | Stage | Git command / action label | Hazırla |
 | Staged | Git status adjective | Hazırlanmış |

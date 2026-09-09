@@ -67,6 +67,7 @@ Use `null` as a review signal for strings that are not safe to translate.
 - Apply correct gender and number agreement: articles (`il/la/lo`, `l'`, `i/le/gli`), adjective endings (`-o/-a/-i/-e`), and past participle agreement with the subject in passive constructions (`Operazione non riuscita`, `File salvati`).
 - Use Italian punctuation conventions. No space before `,`, `.`, `;`, `:`, `!`, `?`. No trailing period in single-sentence button labels and short tooltips.
 - When a placeholder appears mid-sentence, adjust word order so the sentence reads naturally: `Failed to save {path}` → `Salvataggio di {path} non riuscito`, not `Non riuscito salvataggio {path}`.
+- For the composed file-permalink failure toast, use `Impossibile {action}: {err}` with the lowercase infinitive fragments `copiare il permalink del file` and `aprire il permalink del file`. Keep the standalone line-permalink failures nominalized: `Copia del permalink alla riga non riuscita: {err}` and `Apertura del permalink alla riga non riuscita: {err}`. These constructions deliberately differ; check the assembled grammar and gender agreement instead of forcing all failure messages into one syntactic frame.
 - Do not add explanations that are not present in the source.
 - Use the entry `kind`, `call`, `occurrences`, and `code_context` to disambiguate short or overloaded strings.
 - Keep product names, provider names, language names, extension IDs, and model names unchanged unless there is a standard Italian form.

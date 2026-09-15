@@ -70,12 +70,15 @@ W przypadku zaufanych plików w Finderze kliknij prawym przyciskiem i wybierz `O
 
 ## Instalacja przez menedżer pakietów
 
-W systemie macOS możesz zainstalować aplikację za pomocą caska Homebrew.
+W systemach macOS i Linux możesz zainstalować aplikację za pomocą caska Homebrew.
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+W systemie Linux instalacje przez Homebrew nie mogą korzystać z wbudowanej automatycznej aktualizacji Zed; aktualizuje się je poleceniem `brew upgrade --cask zed-i18n`. Wpisy w menu aplikacji nie są tworzone automatycznie, więc uruchamiaj aplikację poleceniem `zed-i18n`.
 
 W systemie Windows dodaj bucket Scoopa, a następnie zainstaluj aplikację.
 

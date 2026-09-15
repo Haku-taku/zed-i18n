@@ -70,12 +70,15 @@ Yalnızca güvendiğiniz dosyalar için Finder'da sağ tıklayıp `Aç` seçene�
 
 ## Paket Yöneticisiyle Kurulum
 
-macOS'ta Homebrew cask ile kurabilirsiniz.
+macOS ve Linux'ta Homebrew cask ile kurabilirsiniz.
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+Linux'ta Homebrew ile yapılan kurulumlar Zed'in kendi otomatik güncellemesini kullanamaz; bunları `brew upgrade --cask zed-i18n` ile güncelleyebilirsiniz. Uygulama menüsü girdileri otomatik olarak oluşturulmadığı için `zed-i18n` ile başlatın.
 
 Windows'ta Scoop bucket'ını ekleyip ardından kurabilirsiniz.
 

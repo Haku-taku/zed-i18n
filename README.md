@@ -70,12 +70,15 @@ For files you trust, right-click the app in Finder and choose `Open`, or remove 
 
 ## Install via Package Manager
 
-On macOS, you can install it with a Homebrew cask.
+On macOS and Linux, you can install it with a Homebrew cask.
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+On Linux, Homebrew installs cannot use Zed's built-in auto-update; update them with `brew upgrade --cask zed-i18n` instead. Desktop menu entries are not registered automatically, so launch with `zed-i18n`.
 
 On Windows, add the Scoop bucket and then install it.
 

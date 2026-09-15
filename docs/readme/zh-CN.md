@@ -70,12 +70,15 @@ cs-CZ · de-DE · es-ES · fr-FR · it-IT · ja-JP · ko-KR · pl-PL · pt-BR ·
 
 ## 通过包管理器安装
 
-在 macOS 上，你可以通过 Homebrew cask 安装。
+在 macOS 和 Linux 上，你可以通过 Homebrew cask 安装。
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+在 Linux 上，通过 Homebrew 安装的版本无法使用 Zed 自带的自动更新，请改用 `brew upgrade --cask zed-i18n` 进行更新。由于不会自动创建应用菜单项，请使用 `zed-i18n` 启动。
 
 在 Windows 上，添加 Scoop bucket 后即可安装。
 

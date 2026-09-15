@@ -52,6 +52,22 @@ def sample_manifest(locales: tuple[str, ...] = ("ja-JP", "ko-KR")) -> dict[str, 
                     f"mac-intel-{locale}",
                 ),
                 release_asset(
+                    f"zed-i18n-{locale}-linux-aarch64.tar.gz",
+                    "app",
+                    locale,
+                    "linux",
+                    "aarch64",
+                    f"linux-arm-{locale}",
+                ),
+                release_asset(
+                    f"zed-i18n-{locale}-linux-x86_64.tar.gz",
+                    "app",
+                    locale,
+                    "linux",
+                    "x86_64",
+                    f"linux-intel-{locale}",
+                ),
+                release_asset(
                     f"Zed-i18n-{locale}-windows-aarch64.zip",
                     "portable_app",
                     locale,
@@ -162,9 +178,76 @@ class PackagingTests(unittest.TestCase):
     def test_homebrew_uses_region_aware_language_args(self) -> None:
         cask = generate_homebrew_cask(sample_manifest(("pt-BR", "zh-CN", "zh-TW")))
 
-        self.assertIn('language "pt", "BR" do', cask)
-        self.assertIn('language "zh", "CN" do', cask)
-        self.assertIn('language "zh", "TW" do', cask)
+        self.assertIn('language "pt-BR" do', cask)
+        self.assertIn('language "zh-CN" do', cask)
+        self.assertIn('language "zh-TW" do', cask)
+
+    def test_homebrew_casks_support_macos_and_linux(self) -> None:
+        for mode, manifest in (
+            ("per-language", sample_manifest()),
+            ("universal", sample_universal_manifest()),
+        ):
+            with self.subTest(mode=mode):
+                cask = generate_homebrew_cask(manifest)
+                self.assertNotIn("depends_on :macos", cask)
+                self.assertNotIn("depends_on :linux", cask)
+                self.assertIn("  on_macos do\n", cask)
+                self.assertIn("  on_linux do\n", cask)
+                self.assertIn("arm64_linux:", cask)
+                self.assertIn("x86_64_linux:", cask)
+                self.assertIn('command_wrapper "zed-i18n", content:', cask)
+                self.assertIn('exec "#{staged_path}/zed.app/bin/zed" "$@"', cask)
+                self.assertIn("brew upgrade --cask zed-i18n", cask)
+                self.assertIn("brew uninstall --cask zed-i18n", cask)
+
+    def test_homebrew_linux_assets_match_each_release_mode(self) -> None:
+        localized = generate_homebrew_cask(sample_manifest())
+        self.assertIn('arm64_linux: "linux-arm-ko-KR"', localized)
+        self.assertIn('x86_64_linux: "linux-intel-ja-JP"', localized)
+        self.assertIn("zed-i18n-#{language}-linux-#{arch}.tar.gz", localized)
+        universal = generate_homebrew_cask(sample_universal_manifest())
+        self.assertIn('arm64_linux: "lin-arm"', universal)
+        self.assertIn('x86_64_linux: "lin-x64"', universal)
+        self.assertIn("zed-i18n-linux-#{arch}.tar.gz", universal)
+
+    def test_missing_linux_assets_fail_before_packaging_files_are_written(self) -> None:
+        for mode, factory in (
+            ("per-language", sample_manifest),
+            ("universal", sample_universal_manifest),
+        ):
+            for arch in ("aarch64", "x86_64"):
+                with self.subTest(mode=mode, arch=arch):
+                    manifest = factory()
+                    manifest["assets"] = [
+                        asset
+                        for asset in manifest["assets"]
+                        if not (
+                            asset["platform"] == "linux"
+                            and asset["arch"] == arch
+                            and (mode == "per-language" or asset["locale"] is None)
+                        )
+                    ]
+                    manifest_path = self.tmp / f"{mode}-{arch}.json"
+                    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+                    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+                    cask_path = self.tmp / mode / arch / "Casks" / "zed-i18n.rb"
+                    bucket_path = self.tmp / mode / arch / "bucket"
+                    with self.assertRaisesRegex(ValueError, "linux"):
+                        generate_packaging_files(manifest_path, cask_path, bucket_path)
+                    self.assertFalse(cask_path.exists())
+                    self.assertFalse(bucket_path.exists())
+
+    def test_linux_assets_require_checksums_and_download_urls(self) -> None:
+        for field in ("sha256", "download_url"):
+            with self.subTest(field=field):
+                manifest = sample_universal_manifest()
+                asset = next(
+                    asset for asset in manifest["assets"]
+                    if asset["platform"] == "linux" and asset["locale"] is None
+                )
+                asset.pop(field)
+                with self.assertRaisesRegex(ValueError, f"missing {field}"):
+                    generate_homebrew_cask(manifest)
 
     def test_generates_scoop_manifests_with_alias_and_no_pre_uninstall(self) -> None:
         manifests = generate_scoop_manifests(sample_manifest())
@@ -360,3 +443,19 @@ class PackagingWorkflowTests(unittest.TestCase):
         self.assertIn("LI-NA/homebrew-zed-i18n", workflow)
         self.assertIn("LI-NA/scoop-zed-i18n", workflow)
         self.assertIn("diff --cached --quiet", workflow)
+
+    def test_homebrew_validates_generated_working_tree_before_publishing(self) -> None:
+        workflow = (Path.cwd() / ".github" / "workflows" / "i18n-update-packaging.yml").read_text(
+            encoding="utf-8"
+        )
+        validation = workflow.index("brew readall --os=all --arch=all li-na/zed-i18n")
+        self.assertLess(workflow.index("uv run zed-i18n generate-packaging"), validation)
+        self.assertLess(workflow.index("brew trust li-na/zed-i18n"), validation)
+        self.assertLess(validation, workflow.index("- name: Commit and push packaging repositories"))
+        contract = workflow.index("brew ruby -- tests/check_homebrew_cask.rb")
+        self.assertLess(validation, contract)
+        self.assertLess(contract, workflow.index("- name: Commit and push packaging repositories"))
+        self.assertIn(
+            'ln -s "$GITHUB_WORKSPACE/packaging/homebrew" "$tap_parent/homebrew-zed-i18n"',
+            workflow,
+        )

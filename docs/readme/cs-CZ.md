@@ -70,12 +70,15 @@ U souborů, kterým důvěřujete, klikněte ve Finderu pravým tlačítkem a zv
 
 ## Instalace přes správce balíčků
 
-Na macOS lze aplikaci nainstalovat přes Homebrew cask.
+Na macOS a Linuxu lze aplikaci nainstalovat přes Homebrew cask.
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+Instalace přes Homebrew v Linuxu nemohou využívat vestavěné automatické aktualizace Zed; aktualizujte je příkazem `brew upgrade --cask zed-i18n`. Položky v nabídce aplikací se nevytvářejí automaticky, proto aplikaci spouštějte příkazem `zed-i18n`.
 
 Na Windows přidejte Scoop bucket a poté aplikaci nainstalujte.
 

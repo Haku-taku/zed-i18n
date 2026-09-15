@@ -70,12 +70,15 @@ Apenas para arquivos em que você confia, clique com o botão direito no Finder 
 
 ## Instalação via gerenciador de pacotes
 
-No macOS, você pode instalar via um cask do Homebrew.
+No macOS e no Linux, você pode instalar via um cask do Homebrew.
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+No Linux, as instalações via Homebrew não podem usar a atualização automática nativa do Zed; atualize-as com `brew upgrade --cask zed-i18n`. As entradas no menu de aplicativos não são criadas automaticamente, então inicie com `zed-i18n`.
 
 No Windows, adicione o bucket do Scoop e, em seguida, instale o aplicativo.
 

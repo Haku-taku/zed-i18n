@@ -70,12 +70,15 @@ cs-CZ · de-DE · es-ES · fr-FR · it-IT · ja-JP · ko-KR · pl-PL · pt-BR ·
 
 ## Установка через менеджер пакетов
 
-В macOS приложение можно установить через Homebrew cask.
+В macOS и Linux приложение можно установить через Homebrew cask.
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+В Linux сборки, установленные через Homebrew, не могут использовать встроенное автообновление Zed; их обновляют командой `brew upgrade --cask zed-i18n`. Пункты в меню приложений автоматически не создаются, поэтому запускайте приложение командой `zed-i18n`.
 
 В Windows добавьте Scoop bucket, а затем установите приложение.
 

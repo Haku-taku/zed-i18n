@@ -21,11 +21,11 @@ HOMEBREW_LANGUAGE_ARGS = {
     "ja-JP": '"ja"',
     "ko-KR": '"ko", default: true',
     "pl-PL": '"pl"',
-    "pt-BR": '"pt", "BR"',
+    "pt-BR": '"pt-BR"',
     "ru-RU": '"ru"',
     "tr-TR": '"tr"',
-    "zh-CN": '"zh", "CN"',
-    "zh-TW": '"zh", "TW"',
+    "zh-CN": '"zh-CN"',
+    "zh-TW": '"zh-TW"',
 }
 
 POST_INSTALL_LINES = [
@@ -72,32 +72,15 @@ def generate_homebrew_cask(manifest: dict[str, Any]) -> str:
     ]
     for locale in locales:
         language_args = HOMEBREW_LANGUAGE_ARGS.get(locale) or _fallback_language_args(locale)
-        assets = _assets_for_locale(manifest, locale=locale, platform="macos", kind="app")
-        arm = _required_asset(assets, "aarch64", locale, "macos")
-        intel = _required_asset(assets, "x86_64", locale, "macos")
         lines.extend(
             [
                 f"  language {language_args} do",
-                f'    sha256 arm: "{arm["sha256"]}", intel: "{intel["sha256"]}"',
+                f"    sha256 {_homebrew_checksums(manifest, locale)}",
                 f'    "{locale}"',
                 "  end",
             ]
         )
-    lines.extend(
-        [
-            "",
-            '  url "https://github.com/LI-NA/zed-i18n/releases/download/v#{version.csv.first}-i18n.#{version.csv.second}/Zed-i18n-#{language}-macos-#{arch}.dmg"',
-            '  name "Zed i18n"',
-            '  desc "Localized build of the Zed editor"',
-            '  homepage "https://github.com/LI-NA/zed-i18n"',
-            "",
-            '  app "Zed i18n.app"',
-            '  binary "#{appdir}/Zed i18n.app/Contents/MacOS/cli", target: "zed-i18n"',
-            "",
-            "  auto_updates true",
-            "end",
-        ]
-    )
+    lines.extend(_homebrew_platform_lines(locale_specific=True))
     return "\n".join(lines) + "\n"
 
 
@@ -105,28 +88,77 @@ def _generate_universal_homebrew_cask(manifest: dict[str, Any]) -> str:
     # The cask token stays "zed-i18n": existing installs upgrade in place to
     # the single build, so the language stanzas simply disappear.
     version = cask_version(manifest)
-    assets = _universal_assets_for(manifest, platform="macos", kind="app")
-    arm = _required_asset(assets, "aarch64", None, "macos")
-    intel = _required_asset(assets, "x86_64", None, "macos")
-
     lines = [
         'cask "zed-i18n" do',
         '  arch arm: "aarch64", intel: "x86_64"',
         f'  version "{version}"',
-        f'  sha256 arm: "{arm["sha256"]}", intel: "{intel["sha256"]}"',
+        f"  sha256 {_homebrew_checksums(manifest, None)}",
+    ]
+    lines.extend(_homebrew_platform_lines(locale_specific=False))
+    return "\n".join(lines) + "\n"
+
+
+def _homebrew_checksums(manifest: dict[str, Any], locale: str | None) -> str:
+    checksums = []
+    for platform, architectures in (
+        ("macos", (("arm", "aarch64"), ("intel", "x86_64"))),
+        ("linux", (("arm64_linux", "aarch64"), ("x86_64_linux", "x86_64"))),
+    ):
+        if locale is None:
+            assets = _universal_assets_for(manifest, platform=platform, kind="app")
+        else:
+            assets = _assets_for_locale(manifest, locale=locale, platform=platform, kind="app")
+        for key, arch in architectures:
+            asset = _required_asset(assets, arch, locale, platform)
+            checksums.append(f'{key}: "{asset["sha256"]}"')
+    return ", ".join(checksums)
+
+
+def _homebrew_platform_lines(*, locale_specific: bool) -> list[str]:
+    locale_segment = "-#{language}" if locale_specific else ""
+    release_url = (
+        "https://github.com/LI-NA/zed-i18n/releases/download/"
+        "v#{version.csv.first}-i18n.#{version.csv.second}"
+    )
+    return [
         "",
-        '  url "https://github.com/LI-NA/zed-i18n/releases/download/v#{version.csv.first}-i18n.#{version.csv.second}/Zed-i18n-macos-#{arch}.dmg"',
+        "  on_macos do",
+        f'    url "{release_url}/Zed-i18n{locale_segment}-macos-#{{arch}}.dmg"',
+        "    auto_updates true",
+        '    app "Zed i18n.app"',
+        '    binary "#{appdir}/Zed i18n.app/Contents/MacOS/cli", target: "zed-i18n"',
+        "  end",
+        "",
+        "  on_linux do",
+        f'    url "{release_url}/zed-i18n{locale_segment}-linux-#{{arch}}.tar.gz"',
+        # Keep the entire bundle in the Caskroom, preserving relative library
+        # and resource paths. The CLI's bundled uninstaller targets install.sh
+        # locations, so package-manager installs must not invoke it.
+        '    command_wrapper "zed-i18n", content: <<~SH',
+        "      #!/bin/sh",
+        '      for arg in "$@"; do',
+        '        case "$arg" in',
+        "          --) break ;;",
+        "          --uninstall)",
+        '            echo "Remove this installation with: brew uninstall --cask zed-i18n" >&2',
+        "            exit 1",
+        "            ;;",
+        "        esac",
+        "      done",
+        '      export ZED_UPDATE_EXPLANATION="${ZED_UPDATE_EXPLANATION:-Run brew upgrade --cask zed-i18n to update.}"',
+        '      exec "#{staged_path}/zed.app/bin/zed" "$@"',
+        "    SH",
+        "    caveats <<~EOS",
+        "      Run zed-i18n to launch. Desktop menu entries are not installed.",
+        "      Linux requires system ALSA and Vulkan libraries and a working graphics driver.",
+        "    EOS",
+        "  end",
+        "",
         '  name "Zed i18n"',
         '  desc "Localized build of the Zed editor"',
         '  homepage "https://github.com/LI-NA/zed-i18n"',
-        "",
-        '  app "Zed i18n.app"',
-        '  binary "#{appdir}/Zed i18n.app/Contents/MacOS/cli", target: "zed-i18n"',
-        "",
-        "  auto_updates true",
         "end",
     ]
-    return "\n".join(lines) + "\n"
 
 
 def _scoop_app_manifest(
@@ -365,6 +397,13 @@ def _validate_packaging_release(
             f"macos={sorted(macos_locales)}, windows={sorted(windows_locales)}"
         )
 
+    linux_locales = _locales_for(manifest, platform="linux", kind="app")
+    if linux_locales != macos_locales:
+        raise ValueError(
+            "macos and linux app locales differ: "
+            f"macos={sorted(macos_locales)}, linux={sorted(linux_locales)}"
+        )
+
     _validate_expected_locales(macos_locales, expected_locales)
 
 
@@ -374,6 +413,7 @@ def _validate_universal_packaging_release(
 ) -> None:
     for platform, kind, label in (
         ("macos", "app", "macos app"),
+        ("linux", "app", "linux app"),
         ("windows", "portable_app", "windows portable_app"),
     ):
         assets = _universal_assets_for(manifest, platform=platform, kind=kind)

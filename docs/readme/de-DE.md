@@ -70,12 +70,15 @@ Bei vertrauenswürdigen Dateien lässt sich die App im Finder per Rechtsklick un
 
 ## Installation über einen Paketmanager
 
-Unter macOS lässt sich die App über einen Homebrew-Cask installieren.
+Unter macOS und Linux lässt sich die App über einen Homebrew-Cask installieren.
 
 ```bash
+brew trust LI-NA/zed-i18n
 brew tap LI-NA/zed-i18n
 brew install --cask zed-i18n
 ```
+
+Unter Linux über Homebrew installierte Builds können die integrierte Auto-Update-Funktion von Zed nicht nutzen; sie werden stattdessen mit `brew upgrade --cask zed-i18n` aktualisiert. Einträge im Anwendungsmenü werden nicht automatisch erstellt, starten Sie die App daher mit `zed-i18n`.
 
 Unter Windows fügt man das Scoop-Bucket hinzu und installiert die App anschließend.
 

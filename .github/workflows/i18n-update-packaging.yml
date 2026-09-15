@@ -163,6 +163,21 @@ jobs:
           git -C packaging/homebrew diff --check
           git -C packaging/scoop diff --check
 
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@082c94ee19e776205cfa8e43802917d1425e2fe7
+
+      - name: Validate Homebrew tap across operating systems and architectures
+        run: |
+          set -euo pipefail
+          # Link the working tree so validation includes the generated, uncommitted cask.
+          tap_parent="$(brew --repository)/Library/Taps/li-na"
+          mkdir -p "$tap_parent"
+          ln -s "$GITHUB_WORKSPACE/packaging/homebrew" "$tap_parent/homebrew-zed-i18n"
+          brew trust li-na/zed-i18n
+          brew readall --os=all --arch=all li-na/zed-i18n
+          brew ruby -- tests/check_homebrew_cask.rb \
+            "$tap_parent/homebrew-zed-i18n/Casks/zed-i18n.rb" release-assets/manifest.json
+
       - name: Commit and push packaging repositories
         run: |
           set -euo pipefail

@@ -452,6 +452,9 @@ def _runtime_format_sources(
                 composite_rule = verify_composite_message_occurrence(
                     source_bytes, relative, source, occurrence
                 )
+            if occurrence.get("kind") == "platform_modifier_format":
+                add_format(source, (source,))
+                continue
             if occurrence.get("kind") in _METADATA_KINDS:
                 static_catalog_sources.add(source)
                 continue

@@ -242,6 +242,104 @@ class TranslationPipelineTests(unittest.TestCase):
             "들여쓰기 가이드의 너비(픽셀), 1에서 10 사이입니다.",
         )
 
+    def test_prepare_translation_batches_preserves_all_contexts_of_reused_doc_fragment(self) -> None:
+        file = "crates/app/src/lib.rs"
+        source_file = self.zed_root / file
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(
+            'pub fn render() { Label::new("Open the item"); }\n'
+            "/// Open the item\n"
+            "/// with a single click.\n"
+            "pub struct SingleClick;\n"
+            "\n"
+            "/// Open the item\n"
+            "/// with a double click.\n"
+            "pub struct DoubleClick;\n",
+            encoding="utf-8",
+        )
+        manifest = {}
+        for source, uses in (
+            (
+                "Open the item",
+                [
+                    (1, "Label::new", "label"),
+                    (2, "rust_doc_comment", "rust_doc_comment"),
+                    (6, "rust_doc_comment", "rust_doc_comment"),
+                ],
+            ),
+            ("with a single click.", [(3, "rust_doc_comment", "rust_doc_comment")]),
+            ("with a double click.", [(7, "rust_doc_comment", "rust_doc_comment")]),
+        ):
+            manifest[source] = {
+                "status": "accepted",
+                "occurrences": [
+                    {
+                        "file": file,
+                        "line": line,
+                        "call": call,
+                        "kind": kind,
+                        "start_byte": 0,
+                        "end_byte": 0,
+                    }
+                    for line, call, kind in uses
+                ],
+            }
+        self._write_json(self.root / "manifest" / "ui-strings.json", manifest)
+        self._write_json(
+            self.root / "translations" / "ko-KR.json",
+            {
+                "with a single click.": "한 번 클릭하여.",
+                "with a double click.": "두 번 클릭하여.",
+            },
+        )
+        (self.root / "prompts" / "translation" / "ko-KR.md").write_text(
+            "Base ko-KR prompt",
+            encoding="utf-8",
+        )
+
+        report = prepare_translation_batches(
+            root=self.root,
+            language="ko-KR",
+            zed_root=self.zed_root,
+            options=PrepareTranslationOptions(batch_size=1, context_lines=1),
+        )
+
+        self.assertEqual(report.source_count, 1)
+        self.assertEqual(report.batch_count, 1)
+        batch = self._read_json(
+            self.root / "reports" / "translation" / "ko-KR" / "batches" / "batch-001.json"
+        )
+        self.assertEqual([entry["source"] for entry in batch["entries"]], ["Open the item"])
+        entry = batch["entries"][0]
+        # Choosing a doc occurrence for code context must not hide the standalone use.
+        self.assertEqual(entry["kind"], "rust_doc_comment")
+        self.assertEqual(entry["occurrences"], manifest["Open the item"]["occurrences"])
+        context = entry["context_group"]
+        self.assertEqual(context["type"], "related_context_groups")
+        self.assertEqual(
+            [group["joined_source"] for group in context["groups"]],
+            ["Open the item with a single click.", "Open the item with a double click."],
+        )
+        self.assertEqual(
+            [
+                [
+                    (item["source"], item["line"], item["target"], item.get("current_translation"))
+                    for item in group["entries"]
+                ]
+                for group in context["groups"]
+            ],
+            [
+                [
+                    ("Open the item", 2, True, None),
+                    ("with a single click.", 3, False, "한 번 클릭하여."),
+                ],
+                [
+                    ("Open the item", 6, True, None),
+                    ("with a double click.", 7, False, "두 번 클릭하여."),
+                ],
+            ],
+        )
+
     def test_prepare_translation_options_rejects_invalid_batch_size(self) -> None:
         with self.assertRaisesRegex(ValueError, "batch size must be positive"):
             PrepareTranslationOptions(batch_size=0)

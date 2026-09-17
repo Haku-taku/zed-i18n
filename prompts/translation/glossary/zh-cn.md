@@ -95,11 +95,14 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Title Bar | | 标题栏 |
 | Tool | | 工具 |
 | Tool Call | | 工具调用 |
+| Tooltip | Hover popup, including project-panel title tooltip settings; not inline/inlay hints or a static label | 工具提示 |
 | Unstage | Git command / action label | 取消暂存 |
 | Unstaged | Git status adjective | 未暂存 |
 | Variable | | 变量 |
 | View | command/action label (View X) | 查看 |
 | View | named UI surface / display mode (X View, Tree View) | 视图 |
+| Watch Roots | Watcher diagnostics tab for registered root paths; inflect naturally in its description and empty state | 监视根目录 |
+| Watcher events | Filesystem change notifications in watcher diagnostics; not debugger variable watches | 监视器事件 |
 | Window | | 窗口 |
 | Workspace | | 工作区 |
 | Worktree | | 工作树 |

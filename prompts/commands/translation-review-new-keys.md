@@ -131,6 +131,7 @@ Tell it:
 - Use glossary/dictionary files as terminology references.
 - Use manifest occurrences, `kind`, `call`, and source context to disambiguate short or ambiguous UI strings.
 - Use `context_group` data in batch files and optional context-group reports to judge setting title/description siblings, connected multi-line strings, and prompt-component strings as one UI unit.
+- Before using wording that depends on sibling fragments, inspect every manifest occurrence, including other groups and standalone uses, and confirm that the translation works in each context. When a fragment is shared by several connected groups or also appears standalone, an exact rejoin against every composed twin may be impossible; prefer wording that works in every occurrence over a byte-exact rejoin with one twin. Otherwise the joined fragments should still agree with their composed twin.
 - For short settings enum labels, first inspect `kind`, sibling enum variants, setting title/description context, any `source_comment`, and source occurrences. Do not apply a glossary row just because the English token matches; verify whether the token is an option value, action, display mode, Git term, or adjective.
 - Choose the better candidate when one model is clearly better.
 - If both models are flawed but the intended UI meaning is clear, write a corrected translation.

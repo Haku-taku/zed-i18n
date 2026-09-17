@@ -99,11 +99,14 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Title Bar | | Başlık çubuğu |
 | Tool | | Araç |
 | Tool Call | | Araç çağrısı |
+| Tooltip | Hover popup, including project-panel title tooltip settings; not inline/inlay hints or a static label | araç ipucu |
 | Unstage | Git command / action label | Hazırlığı geri al |
 | Unstaged | Git status adjective | Hazırlanmamış |
 | Variable | | Değişken |
 | View | command/action label (View X) | Görüntüle |
 | View | named UI surface / display mode (X View, Tree View) | Görünüm |
+| Watch Roots | Watcher diagnostics tab for registered root paths; inflect naturally in its description and empty state | İzleme Kökleri |
+| Watcher events | Filesystem change notifications in watcher diagnostics; not debugger variable watches | izleyici olayları |
 | Window | | Pencere |
 | Workspace | | Çalışma alanı |
 | Worktree | | Worktree |

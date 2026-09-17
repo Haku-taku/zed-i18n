@@ -29,6 +29,7 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Cursor | | 커서 |
 | Debug | | 디버그 |
 | Definition | code navigation | 정의 |
+| Delay | Waiting time before a UI effect, including tooltip appearance | 지연 시간 |
 | Diagnostics | | 진단 |
 | Diff | | Diff |
 | Diff View | named Git UI view / screen | Diff 뷰 |
@@ -102,12 +103,15 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Title Bar | | 제목 표시줄 |
 | Tool | | 도구 |
 | Tool Call | | 도구 호출 |
+| Tooltip | Hover popup, including project-panel title tooltip settings; not inline/inlay hints or a static label | 툴팁 |
 | Unstage | Git command / action label | 스테이징 해제 |
 | Unstaged | Git status adjective | 스테이징되지 않은 |
 | Variable | | 변수 |
 | View | command verb / action label (View X) | 보기 |
 | View | display mode / layout option (tree view, flat view, split view) | 보기 |
 | View | named UI surface / screen / pane | 뷰 |
+| Watch Roots | Watcher diagnostics tab for registered root paths; inflect naturally in its description and empty state | 감시 루트 |
+| Watcher events | Filesystem change notifications in watcher diagnostics; not debugger variable watches | 감시자 이벤트 |
 | Window | | 창 |
 | Workspace | | 작업 영역 |
 | Worktree | | 워크트리 |

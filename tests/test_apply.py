@@ -14,6 +14,42 @@ class ApplyTests(unittest.TestCase):
     def tearDown(self) -> None:
         shutil.rmtree(self.root, ignore_errors=True)
 
+    def test_applies_platform_modifier_format(self) -> None:
+        source_path = self.root / "crates" / "demo" / "src" / "lib.rs"
+        source_path.parent.mkdir(parents=True)
+        expression = 'concat!("Use ", ui::alt_key_name!(), "+click to show all conflicts")'
+        source_text = f"Tooltip::text({expression});\n"
+        source_path.write_text(source_text, encoding="utf-8")
+        start = len(source_text[: source_text.index(expression)].encode("utf-8"))
+        manifest = {
+            "Use {modifier}+click to show all conflicts": {
+                "status": "accepted",
+                "occurrences": [
+                    {
+                        "file": "crates/demo/src/lib.rs",
+                        "line": 1,
+                        "call": "Tooltip::text",
+                        "kind": "platform_modifier_format",
+                        "start_byte": start,
+                        "end_byte": start + len(expression.encode("utf-8")),
+                    }
+                ],
+            }
+        }
+
+        report = apply_translations(
+            self.root,
+            manifest,
+            {"Use {modifier}+click to show all conflicts": "{modifier}+클릭으로 모든 충돌 표시"},
+        )
+
+        self.assertTrue(report.ok)
+        rewritten = source_path.read_text(encoding="utf-8")
+        self.assertIn(
+            'format!("{modifier}+클릭으로 모든 충돌 표시", modifier = ui::alt_key_name!())',
+            rewritten,
+        )
+
     def test_applies_accepted_translation_at_recorded_location(self) -> None:
         source_path = self.root / "crates" / "zed" / "src" / "zed" / "app_menus.rs"
         source_path.parent.mkdir(parents=True)

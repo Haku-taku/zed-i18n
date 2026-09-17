@@ -62,6 +62,7 @@ PATCH_TARGETS = (
     "crates/ui/src/components/context_menu.rs",
     "crates/zed/Cargo.toml",
     "crates/zed/src/main.rs",
+    "crates/zed/src/watcher_debug.rs",
     "crates/zed/src/zed.rs",
     "crates/workspace/Cargo.toml",
     "crates/workspace/src/pane.rs",
@@ -116,6 +117,10 @@ class RuntimeOverlayPatchTests(unittest.TestCase):
 
         main = self._read("crates/zed/src/main.rs")
         self.assertIn("zed::initialize_localization(fs.clone(), cx);", main)
+        watcher_debug = self._read("crates/zed/src/watcher_debug.rs")
+        self.assertIn(
+            'Self::ScanExclusions => localization::localized_str!(', watcher_debug
+        )
         self.assertTrue((self.zed_root / "crates/zed/src/zed/ui_locale.rs").exists())
         self.assertTrue(
             (self.zed_root / "crates/settings_ui/src/components/locale_picker.rs").exists()

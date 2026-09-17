@@ -102,12 +102,15 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Title Bar | | Заголовок окна |
 | Tool | | Инструмент |
 | Tool Call | | Вызов инструмента |
+| Tooltip | Hover popup, including project-panel title tooltip settings; not inline/inlay hints or a static label | подсказка |
 | Unstage | Git command / action label | Удалить из индекса |
 | Unstaged | Git status adjective | Не в индексе |
 | Variable | | Переменная |
 | View | command/action label (View X) | Показать |
 | View | top-level menu (View) | Вид |
 | View | named UI surface / display mode (X View, Tree View) | Представление |
+| Watch Roots | Watcher diagnostics tab for registered root paths; inflect naturally in its description and empty state | Отслеживаемые корневые пути |
+| Watcher events | Filesystem change notifications in watcher diagnostics; not debugger variable watches | события отслеживания |
 | Window | | Окно |
 | Workspace | | Рабочая область |
 | Worktree | | Рабочее дерево |

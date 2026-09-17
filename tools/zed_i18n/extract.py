@@ -697,6 +697,30 @@ GIT_GRAPH_CHANGED_FILES_COUNT_FRAGMENT_SOURCES = {
     "Files",
 }
 
+EMMET_INLINE_UI_SOURCES = {
+    "Emmet abbreviation, e.g. ul>li*",
+    "No Emmet expansion for {abbreviation:?}",
+}
+
+AGENT_SKILL_DESCRIPTION_UI_SOURCES = {
+    "Skill description is {actual_len} characters, exceeding the {max_len}-character limit. The skill was loaded, but long descriptions may consume more model-context tokens.",
+    "Skill description must be at most {MAX_SKILL_DESCRIPTION_LEN} characters",
+}
+
+WATCHER_DEBUG_UI_SOURCES = {
+    "Debug Filesystem Watching",
+    "Raw Events",
+    "Watch Roots",
+    "Scan Exclusions",
+    "Raw watcher notifications, oldest first. Times are shown in your local time zone.",
+    "Live native and polling watch roots across the app.",
+    "Patterns Zed skips when scanning your open local projects. Excluded files may still produce watcher events.",
+    "Waiting for filesystem watcher events…",
+    "No watch roots.",
+    "No local projects are open.",
+    "Save failed: {error:#}",
+}
+
 
 def should_skip_path(relative_path: str) -> bool:
     normalized = Path(relative_path).as_posix()
@@ -758,6 +782,15 @@ def extract_ui_strings_from_source(source: str, relative_path: str) -> list[Stri
                 continue
 
             argument_node = arguments[argument_index]
+            platform_modifier = _platform_modifier_concat_occurrence(
+                source_bytes,
+                argument_node,
+                relative_path,
+                call_name,
+            )
+            if platform_modifier is not None:
+                occurrences.append(platform_modifier)
+                continue
             for literal_node in _visible_literal_nodes(
                 source_bytes,
                 argument_node,
@@ -978,6 +1011,10 @@ def _rules_for_call(call: str) -> tuple[tuple[int, str, str], ...]:
         return ((0, "inline_description", "InlineDescription::Text"),)
     if canonical.endswith(".set_placeholder_text") or canonical == "set_placeholder_text":
         return ((0, "placeholder", "set_placeholder_text"),)
+    if canonical.endswith(".set_window_title") or canonical == "set_window_title":
+        return ((0, "window_title", "set_window_title"),)
+    if canonical.endswith(".show_inline_input") or canonical == "show_inline_input":
+        return ((0, "placeholder", "show_inline_input"),)
     if canonical.endswith(".with_placeholder") or canonical == "with_placeholder":
         return ((0, "placeholder", "with_placeholder"),)
     if canonical.endswith(".tooltip_label") or canonical == "tooltip_label":
@@ -1235,6 +1272,49 @@ def _contextual_rules_for_call(call: str, relative_path: str) -> tuple[tuple[int
     return ()
 
 
+def _platform_modifier_concat_occurrence(
+    source_bytes: bytes,
+    node,
+    relative_path: str,
+    call_name: str,
+) -> StringOccurrence | None:
+    if node.type != "macro_invocation":
+        return None
+    raw = _node_text(source_bytes, node)
+    source = _platform_modifier_format_source(raw)
+    if source is None:
+        return None
+    return StringOccurrence(
+        source=source,
+        file=relative_path,
+        line=node.start_point[0] + 1,
+        call=call_name,
+        kind="platform_modifier_format",
+        start_byte=node.start_byte,
+        end_byte=node.end_byte,
+        translation_note=(
+            "The {modifier} placeholder is the platform key name: alt on Windows/Linux "
+            "and option on macOS. Preserve the placeholder and place it naturally."
+        ),
+    )
+
+
+def _platform_modifier_format_source(raw: str) -> str | None:
+    match = re.fullmatch(
+        r'concat!\(\s*("(?:\\.|[^"\\])*")\s*,\s*'
+        r'ui::alt_key_name!\(\)\s*,\s*("(?:\\.|[^"\\])*")\s*\)',
+        raw,
+        re.S,
+    )
+    if match is None:
+        return None
+    return (
+        parse_rust_string_literal(match.group(1))
+        + "{modifier}"
+        + parse_rust_string_literal(match.group(2))
+    )
+
+
 def _extract_git_branch_diff_notification_errors_for_call(
     source_bytes: bytes,
     function_node,
@@ -1389,6 +1469,13 @@ def _extract_ui_return_method_occurrences(source_bytes: bytes, node, relative_pa
 
     method_name = _node_text(source_bytes, name_node)
     rule = UI_RETURN_METHODS.get(method_name)
+    if rule is None and relative_path == "crates/zed/src/watcher_debug.rs":
+        if method_name == "label":
+            rule = ("tab_title", "WatcherTab.label")
+        elif method_name == "description":
+            rule = ("description", "WatcherTab.description")
+        elif method_name == "empty_message":
+            rule = ("empty_state", "WatcherTab.empty_message")
     if rule is None and relative_path == "crates/workspace/src/dock.rs" and method_name == "label":
         rule = ("dock_position_label", "DockPosition.label")
     if (
@@ -2183,6 +2270,30 @@ def _allowed_literal_rules_for_path(
     relative_path: str,
 ) -> list[tuple[set[str], str, str]]:
     rules: list[tuple[set[str], str, str]] = []
+    if relative_path == "crates/editor/src/emmet_ext.rs":
+        rules.append(
+            (
+                EMMET_INLINE_UI_SOURCES,
+                "input_error",
+                "Emmet.inline_input",
+            )
+        )
+    if relative_path == "crates/agent_skills/agent_skills.rs":
+        rules.append(
+            (
+                AGENT_SKILL_DESCRIPTION_UI_SOURCES,
+                "input_error",
+                "AgentSkills.description_validation",
+            )
+        )
+    if relative_path == "crates/zed/src/watcher_debug.rs":
+        rules.append(
+            (
+                WATCHER_DEBUG_UI_SOURCES,
+                "label",
+                "WatcherDebug.ui",
+            )
+        )
     if relative_path == "crates/workspace/src/workspace.rs":
         rules.append(
             (

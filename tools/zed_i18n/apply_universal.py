@@ -9,7 +9,7 @@ import re
 from typing import Mapping
 
 from .composite_messages import verify_composite_message_occurrence
-from .extract import _title_case_identifier
+from .extract import _platform_modifier_format_source, _title_case_identifier
 from .rust_ast import make_rust_parser, node_text, walk_nodes
 from .rust_strings import parse_rust_string_literal, rust_string_literal
 
@@ -141,6 +141,7 @@ _KNOWN_KINDS = {
     "picker_section_header",
     "picker_separator",
     "placeholder",
+    "platform_modifier_format",
     "platform_action_label",
     "prediction_status_label",
     "prediction_trigger_label",
@@ -354,7 +355,16 @@ def build_handling_map(
             ):
                 raise ValueError(f"stale occurrence span: {relative}:{line}")
             handling_class = _classify_occurrence(kind, node, source_bytes)
-            if handling_class in {
+            if handling_class == "rewrite_platform_modifier":
+                if node is None or node.type != "macro_invocation":
+                    raise ValueError(f"stale occurrence span: {relative}:{line}")
+                actual_source = _platform_modifier_format_source(raw)
+                if actual_source != source:
+                    raise ValueError(
+                        f"stale platform modifier source: {relative}:{line}: "
+                        f"expected {source!r}, got {actual_source!r}"
+                    )
+            elif handling_class in {
                 "rewrite_static",
                 "rewrite_format",
                 "rewrite_const_context",
@@ -1297,6 +1307,15 @@ const SETTINGS_DISCLAIMER: &str = "Note: custom tool permissions only apply to t
     )
 
     patch(
+        "crates/zed/src/watcher_debug.rs",
+        "            Self::ScanExclusions => EXCLUSION_SCOPE,",
+        '''            Self::ScanExclusions => localization::localized_str!(
+                "Patterns Zed skips when scanning your open local projects. Excluded files may still produce watcher events."
+            ),''',
+    )
+    dependency("crates/zed/Cargo.toml", "anyhow", "localization")
+
+    patch(
         "crates/workspace/src/pane.rs",
         '''        const CONFLICT_MESSAGE: &str = "This file has changed on disk since you started editing it. Do you want to overwrite it?";
 
@@ -1394,6 +1413,7 @@ _EXPECTED_MANUAL_SITES: frozenset[tuple[str, str]] = frozenset({
     ("crates/search/src/search.rs", "Include: e.g. src/**/*.rs"),
     ("crates/search/src/search.rs", "Replace in project…"),
     ("crates/settings/src/base_keymap_setting.rs", "Zed (Default)"),
+    ("crates/zed/src/watcher_debug.rs", "Patterns Zed skips when scanning your open local projects. Excluded files may still produce watcher events."),
     ("crates/settings_ui/src/pages/sandbox_settings.rs", "Each entry is an exact domain (github.com) or a leading-*. subdomain wildcard (*.npmjs.org). IP addresses and local domains are not allowed."),
     ("crates/settings_ui/src/pages/sandbox_settings.rs", "Each entry must be an absolute path and grants write access to the whole subtree, except protected Git metadata."),
     ("crates/settings_ui/src/pages/tool_permissions_setup.rs", "Commands executed in the terminal"),
@@ -1831,7 +1851,11 @@ def apply_universal(
 
     entries_by_file: dict[str, list[HandlingEntry]] = defaultdict(list)
     for entry in handling.entries:
-        if entry.handling_class in {"rewrite_static", "rewrite_format"}:
+        if entry.handling_class in {
+            "rewrite_static",
+            "rewrite_format",
+            "rewrite_platform_modifier",
+        }:
             entries_by_file[entry.file].append(entry)
 
     planned_files: dict[Path, str] = {}
@@ -1871,6 +1895,14 @@ def apply_universal(
                         f"accepted occurrences disagree on one format macro: {entry.file}:{entry.line}"
                     )
                 format_macros[span] = (macro, format_source)
+            elif entry.handling_class == "rewrite_platform_modifier":
+                replacements.append(
+                    _Replacement(
+                        start=entry.start_byte,
+                        end=entry.end_byte,
+                        text=_platform_modifier_runtime_expression(entry.source),
+                    )
+                )
             applied_occurrences += 1
 
         for macro, format_source in sorted(
@@ -1966,6 +1998,8 @@ def _classify_occurrence(kind: str, node, source_bytes: bytes) -> str:
         return "action_metadata"
     if kind in _SETTINGS_ENUM_KINDS:
         return "settings_enum"
+    if kind == "platform_modifier_format":
+        return "rewrite_platform_modifier"
     if node is None:
         return "not_runtime_visible"
 
@@ -1987,6 +2021,15 @@ def _classify_occurrence(kind: str, node, source_bytes: bytes) -> str:
             return "rewrite_thiserror"
         parent = parent.parent
     return "rewrite_static"
+
+
+def _platform_modifier_runtime_expression(source: str) -> str:
+    return (
+        "localization::format_message(\n"
+        f"    {rust_string_literal(source)},\n"
+        '    &[("modifier", ui::alt_key_name!().to_owned())],\n'
+        ")"
+    )
 
 
 def _is_format_source_argument(node, macro, macro_name: str) -> bool:

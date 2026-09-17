@@ -26,6 +26,34 @@ class UniversalApplyTests(unittest.TestCase):
     def tearDown(self) -> None:
         shutil.rmtree(self.root, ignore_errors=True)
 
+    def test_rewrites_platform_modifier_format_for_runtime_localization(self) -> None:
+        expression = 'concat!("Use ", ui::alt_key_name!(), "+click to show all conflicts")'
+        source = f"fn render() {{ Tooltip::text({expression}); }}\n"
+        path = self._write_source("crates/demo/src/lib.rs", source)
+        cargo = self.zed_root / "crates" / "demo" / "Cargo.toml"
+        cargo.write_text(
+            '[package]\nname = "demo"\nversion = "0.1.0"\n\n[dependencies]\nui.workspace = true\n',
+            encoding="utf-8",
+        )
+        manifest = {
+            "Use {modifier}+click to show all conflicts": self._entry(
+                path,
+                source,
+                expression,
+                1,
+                "platform_modifier_format",
+            )
+        }
+
+        report = apply_universal(self.root, self.zed_root, manifest)
+
+        self.assertTrue(report.ok)
+        rewritten = path.read_text(encoding="utf-8")
+        self.assertIn("localization::format_message(", rewritten)
+        self.assertIn('"Use {modifier}+click to show all conflicts"', rewritten)
+        self.assertIn('("modifier", ui::alt_key_name!().to_owned())', rewritten)
+        self.assertIn("localization.workspace = true", cargo.read_text(encoding="utf-8"))
+
     def test_builds_complete_handling_map_from_ast_context(self) -> None:
         source = "\n".join(
             [

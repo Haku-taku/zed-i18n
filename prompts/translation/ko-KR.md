@@ -83,6 +83,10 @@ Use `null` as a review signal for strings that are not safe to translate.
 
 The glossary table handles the term choices; only rules it cannot carry remain here.
 
+- **Time-unit spacing**: In translated natural-language text, separate the number from the unit symbol with a regular space: `1500 ms`, `2000 ms`. This includes prose descriptions and `Default:` value lines. Unquoted `1500ms` in English prose is not a protected code literal. Preserve source keys, placeholders, and code spans byte-for-byte.
+- **Connected doc fragments**: Read adjacent doc-comment entries as one message and translate their assembled meaning. Preserve code spans in their assigned entries. Before using wording that depends on sibling fragments, check every occurrence, including other connected groups and standalone uses, and confirm the wording works in each context. Do not make each fragment a standalone sentence merely to improve isolated readability.
+- **Modifier-click instructions**: For the keymap editor's `{modifier}+click` hints, preserve `{modifier}` and write `{modifier} 키를 누른 채 클릭`. The modifier expands to `option` or `alt`; the prose `+click` is not a keybinding identifier. Preserve the newline in the two-line overridden-binding hint.
+
 - **Preserve product/protocol names**: Keep product names, provider names, protocol names, skill IDs, folder names, and filename literals unchanged unless source context explicitly asks to localize them. Preserve `SKILL.md`, `Agent Client Protocol`, `Agent Server`, `Claude Agent`, `OpenAI`, `Anthropic`, `GitHub Copilot`, and `OpenRouter` byte-for-byte.
 - **Task / Operation**: 작업. Use 태스크 only when the source explicitly refers to a named task-runner concept and the surrounding UI already uses 태스크.
 - **Declaration / Implementation / Type Definition**: 선언 / 구현 / 타입 정의 for code navigation. (Reference and Definition are in the glossary.)

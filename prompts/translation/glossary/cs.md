@@ -101,11 +101,14 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Title Bar | | Záhlaví |
 | Tool | | Nástroj |
 | Tool Call | | Volání nástroje |
+| Tooltip | Hover popup, including project-panel title tooltip settings; not inline/inlay hints or a static label | popisek |
 | Unstage | Git command / action label | Odebrat z přípravy |
 | Unstaged | Git status adjective | Nepřipravené |
 | Variable | | Proměnná |
 | View | command/action label (View X) | Zobrazit |
 | View | named UI surface / display mode (X View, Tree View) | Zobrazení |
+| Watch Roots | Watcher diagnostics tab for registered root paths; inflect naturally in its description and empty state | Kořeny sledování |
+| Watcher events | Filesystem change notifications in watcher diagnostics; not debugger variable watches | události sledovače |
 | Window | | Okno |
 | Workspace | | Pracovní prostor |
 | Worktree | | Worktree |

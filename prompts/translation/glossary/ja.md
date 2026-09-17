@@ -26,6 +26,8 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Context | | コンテキスト |
 | Cursor | | カーソル |
 | Debug | | デバッグ |
+| Default | Prefix introducing a setting's default value (`Default:`), independent of the value type | 既定値 |
+| Default | Standalone settings option or default behavior/configuration | デフォルト |
 | Definition | code navigation | 定義 |
 | Diagnostics | | 診断 |
 | Diff | | 差分 |
@@ -95,11 +97,14 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Title Bar | | タイトルバー |
 | Tool | | ツール |
 | Tool Call | | ツール呼び出し |
+| Tooltip | Hover popup, including project-panel title tooltip settings; not inline/inlay hints or a static label | ツールチップ |
 | Unstage | Git command / action label | ステージング解除 |
 | Unstaged | Git status adjective | 未ステージ |
 | Variable | | 変数 |
 | View | command/action label (View X) | 表示 |
 | View | named UI surface / display mode (X View, Tree View) | ビュー |
+| Watch Roots | Watcher diagnostics tab for registered root paths; inflect naturally in its description and empty state | 監視ルート |
+| Watcher events | Filesystem change notifications in watcher diagnostics; not debugger variable watches | 監視イベント |
 | Window | | ウィンドウ |
 | Workspace | | ワークスペース |
 | Worktree | | ワークツリー |

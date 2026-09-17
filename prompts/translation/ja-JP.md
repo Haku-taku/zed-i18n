@@ -83,6 +83,10 @@ Use `null` as a review signal for strings that are not safe to translate.
 
 The glossary table handles the term choices; only rules it cannot carry remain here.
 
+- **Time-unit spacing**: In translated natural-language text, separate the number from the unit symbol with a regular space: `1500 ms`, `2000 ms`. This includes prose descriptions and `Default:` value lines. Unquoted `1500ms` in English prose is not a protected code literal. Preserve source keys, placeholders, and code spans byte-for-byte.
+- **Connected doc fragments**: Read adjacent doc-comment entries as one message and translate their assembled meaning. Preserve code spans in their assigned entries. Before using wording that depends on sibling fragments, check every occurrence, including other connected groups and standalone uses, and confirm the wording works in each context. Do not make each fragment a standalone sentence merely to improve isolated readability.
+- **Default values versus default behavior**: Translate the `Default:` setting-value prefix consistently as `既定値:` and `Default is 1500ms.` as `既定値は 1500 ms です。`. Keep `デフォルト` for the standalone `Default` option and for default behavior/configuration. Do not choose a different prefix based on whether the value is numeric, quoted, or an identifier.
+
 - **Preserve product/protocol names**: Keep product names, provider names, protocol names, skill IDs, folder names, and filename literals unchanged unless source context explicitly asks to localize them. Preserve `SKILL.md`, `Agent Client Protocol`, `Agent Server`, `Claude Agent`, `OpenAI`, `Anthropic`, `GitHub Copilot`, and `OpenRouter` byte-for-byte.
 - **Declaration / Implementation / Type Definition**: 宣言 / 実装 / 型定義 for code navigation. (Reference and Definition are in the glossary.)
 

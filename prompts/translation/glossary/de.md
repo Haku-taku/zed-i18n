@@ -102,11 +102,14 @@ Before applying a row, verify the source term's role and `kind` / `code_context`
 | Title Bar | | Titelleiste |
 | Tool | | Tool |
 | Tool Call | | Toolaufruf |
+| Tooltip | Hover popup, including project-panel title tooltip settings; not inline/inlay hints or a static label | Tooltip |
 | Unstage | Git command / action label | Vom Stage entfernen |
 | Unstaged | Git status adjective / compact label | ungestagt |
 | Variable | | Variable |
 | View | command/action label (View X) | anzeigen |
 | View | named UI surface / display mode (X View, Tree View) | Ansicht |
+| Watch Roots | Watcher diagnostics tab for registered root paths; inflect naturally in its description and empty state | Überwachte Stammverzeichnisse |
+| Watcher events | Filesystem change notifications in watcher diagnostics; not debugger variable watches | Überwachungsereignisse |
 | Window | | Fenster |
 | Workspace | | Arbeitsbereich |
 | Worktree | | Worktree |

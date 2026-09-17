@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 
 from .composite_messages import rewrite_composite_message_source
+from .extract import _platform_modifier_format_source
 from .rust_strings import (
     parse_rust_string_literal,
     rust_format_placeholders_compatible,
@@ -117,6 +118,24 @@ def _apply_one(
         return False
 
     text = file_path.read_text(encoding="utf-8")
+    if occurrence.get("kind") == "platform_modifier_format":
+        start = occurrence.get("start_byte")
+        end = occurrence.get("end_byte")
+        if not isinstance(start, int) or not isinstance(end, int):
+            return False
+        source_bytes = text.encode("utf-8")
+        if start < 0 or end <= start or end > len(source_bytes):
+            return False
+        raw = source_bytes[start:end].decode("utf-8")
+        if _platform_modifier_format_source(raw) != source:
+            return False
+        replacement = (
+            f"format!({rust_string_literal(translation)}, "
+            "modifier = ui::alt_key_name!())"
+        ).encode("utf-8")
+        rewritten = source_bytes[:start] + replacement + source_bytes[end:]
+        file_path.write_text(rewritten.decode("utf-8"), encoding="utf-8")
+        return True
     composite_rule_id = occurrence.get("composite_rule_id")
     if isinstance(composite_rule_id, str):
         rewritten = rewrite_composite_message_source(

@@ -7,6 +7,108 @@ from tools.zed_i18n.extract import extract_repository, extract_ui_strings_from_s
 
 
 class ExtractTests(unittest.TestCase):
+    def test_extracts_v1_20_1_indirect_ui_strings(self) -> None:
+        emmet_source = "\n".join(
+            [
+                "fn wrap(editor: &mut Editor) {",
+                '    editor.show_inline_input("Emmet abbreviation, e.g. ul>li*", position);',
+                "}",
+                "fn no_expansion_message(abbreviation: &str) -> String {",
+                '    format!("No Emmet expansion for {abbreviation:?}")',
+                "}",
+            ]
+        )
+        watcher_source = "\n".join(
+            [
+                'const EXCLUSION_SCOPE: &str = "Patterns Zed skips when scanning your open local projects. Excluded files may still produce watcher events.";',
+                "impl WatcherTab {",
+                "    fn label(self) -> &'static str {",
+                '        match self { Self::RawEvents => "Raw Events", Self::WatchRoots => "Watch Roots", Self::ScanExclusions => "Scan Exclusions" }',
+                "    }",
+                "    fn description(self) -> &'static str {",
+                '        match self { Self::RawEvents => "Raw watcher notifications, oldest first. Times are shown in your local time zone.", Self::WatchRoots => "Live native and polling watch roots across the app.", Self::ScanExclusions => EXCLUSION_SCOPE }',
+                "    }",
+                "    fn empty_message(self) -> &'static str {",
+                '        match self { Self::RawEvents => "Waiting for filesystem watcher events…", Self::WatchRoots => "No watch roots.", Self::ScanExclusions => "No local projects are open." }',
+                "    }",
+                "}",
+                "fn render(window: &mut Window, error: Error) {",
+                '    window.set_window_title("Debug Filesystem Watching");',
+                '    let save_error = format!("Save failed: {error:#}");',
+                "}",
+            ]
+        )
+        skill_source = "\n".join(
+            [
+                "impl SkillLoadWarning {",
+                "    fn message(&self) -> String {",
+                '        format!("Skill description is {actual_len} characters, exceeding the {max_len}-character limit. The skill was loaded, but long descriptions may consume more model-context tokens.")',
+                "    }",
+                "}",
+                "fn validate_description() {",
+                '    Err(formatcp!("Skill description must be at most {MAX_SKILL_DESCRIPTION_LEN} characters"));',
+                "}",
+            ]
+        )
+
+        sources = {
+            occurrence.source
+            for source, path in (
+                (emmet_source, "crates/editor/src/emmet_ext.rs"),
+                (watcher_source, "crates/zed/src/watcher_debug.rs"),
+                (skill_source, "crates/agent_skills/agent_skills.rs"),
+            )
+            for occurrence in extract_ui_strings_from_source(source, path)
+        }
+
+        self.assertTrue(
+            {
+                "Emmet abbreviation, e.g. ul>li*",
+                "No Emmet expansion for {abbreviation:?}",
+                "Debug Filesystem Watching",
+                "Raw Events",
+                "Watch Roots",
+                "Scan Exclusions",
+                "Raw watcher notifications, oldest first. Times are shown in your local time zone.",
+                "Live native and polling watch roots across the app.",
+                "Patterns Zed skips when scanning your open local projects. Excluded files may still produce watcher events.",
+                "Waiting for filesystem watcher events…",
+                "No watch roots.",
+                "No local projects are open.",
+                "Save failed: {error:#}",
+                "Skill description is {actual_len} characters, exceeding the {max_len}-character limit. The skill was loaded, but long descriptions may consume more model-context tokens.",
+                "Skill description must be at most {MAX_SKILL_DESCRIPTION_LEN} characters",
+            }.issubset(sources)
+        )
+
+    def test_extracts_platform_modifier_concat_messages_from_known_ui_sinks(self) -> None:
+        source = "\n".join(
+            [
+                "fn render() {",
+                '    Tooltip::with_meta("View conflicts", None, concat!("Use ", ui::alt_key_name!(), "+click to show all conflicts"), cx);',
+                '    Label::new(concat!("Display predictions inline only when holding a modifier key (", ui::alt_key_name!(), " by default)."));',
+                '    log::info!(concat!("internal ", ui::alt_key_name!(), " message"));',
+                "}",
+            ]
+        )
+
+        occurrences = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/keymap_editor/src/keymap_editor.rs",
+        )
+        by_source = {occurrence.source: occurrence for occurrence in occurrences}
+
+        self.assertIn("Use {modifier}+click to show all conflicts", by_source)
+        self.assertIn(
+            "Display predictions inline only when holding a modifier key ({modifier} by default).",
+            by_source,
+        )
+        self.assertNotIn("internal {modifier} message", by_source)
+        self.assertEqual(
+            by_source["Use {modifier}+click to show all conflicts"].kind,
+            "platform_modifier_format",
+        )
+
     def test_extracts_high_confidence_ui_string_literals(self) -> None:
         source = "\n".join(
             [

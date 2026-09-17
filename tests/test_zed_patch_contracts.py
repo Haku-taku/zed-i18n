@@ -122,8 +122,8 @@ class ZedPatchContractTests(unittest.TestCase):
             explorer_command_injector,
         )
         self.assertIn('HSTRING::from("Open with Zed i18n")', explorer_command_injector)
-        self.assertNotIn("--package remote_server", bundle_linux)
-        self.assertNotIn("--package remote_server", bundle_macos)
+        self.assertNotIn("remote_server", bundle_linux)
+        self.assertNotIn("remote_server", bundle_macos)
         self.assertNotIn("BuildRemoteServer", bundle_windows)
         self.assertIn("function create_dmg_with_retry()", bundle_macos)
         self.assertEqual(bundle_macos.count("function create_dmg_with_retry()"), 1)

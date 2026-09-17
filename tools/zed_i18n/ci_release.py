@@ -414,24 +414,31 @@ def patch_remote_server_build(zed_root: Path, platform: str) -> None:
 
 def patch_linux_remote_server_build(path: Path) -> None:
     script = path.read_text(encoding="utf-8")
-    script = script.replace(
-        """if "$rustup_installed"; then
-    rustup target add "$remote_server_triple"
-fi
-
-""",
+    script = re.sub(
+        r"^musl_triple=\$\{target_triple%-gnu\}-musl\r?\n"
+        r'^remote_server_triple=\$\{REMOTE_SERVER_TARGET:-"\$\{musl_triple\}"\}\r?\n'
+        r"rustup_installed=false\r?\n"
+        r"if command -v rustup >/dev/null 2>&1; then\r?\n"
+        r"[ \t]+rustup_installed=true\r?\n"
+        r"fi\r?\n\r?\n?",
         "",
+        script,
+        flags=re.MULTILINE,
     )
-    script = script.replace(
-        """# Build remote_server in separate invocation to prevent feature unification from other crates
-# from influencing dynamic libraries required by it.
-if [[ "$remote_server_triple" == "$musl_triple" ]]; then
-    export RUSTFLAGS="${RUSTFLAGS:-} -C target-feature=+crt-static"
-fi
-cargo build --release --target "${remote_server_triple}" --package remote_server
-
-""",
+    script = re.sub(
+        r'^if "\$rustup_installed"; then\r?\n'
+        r'[ \t]+rustup target add "\$remote_server_triple"\r?\n'
+        r"fi\r?\n\r?\n?",
         "",
+        script,
+        flags=re.MULTILINE,
+    )
+    script = re.sub(
+        r"^# Build remote_server in separate invocation to prevent feature unification from other crates\r?\n"
+        r".*?^cargo [^\r\n]*--package remote_server[^\r\n]*\r?\n\r?\n?",
+        "",
+        script,
+        flags=re.MULTILINE | re.DOTALL,
     )
     script = script.replace(
         ' \\\n                "${target_dir}/${remote_server_triple}"/release/remote_server',
@@ -464,29 +471,29 @@ cargo build --release --target "${remote_server_triple}" --package remote_server
         for line in script.splitlines(keepends=True)
         if "--package remote_server" not in line
         and "zed-remote-server-linux" not in line
-        and 'llvm-objcopy --strip-debug "${target_dir}/${remote_server_triple}/release/remote_server"' not in line
+        and not ("llvm-objcopy " in line and "/remote_server" in line)
     )
-    if "--package remote_server" in script or "zed-remote-server-linux" in script:
-        raise ValueError("failed to remove Linux remote_server build steps")
+    if "remote_server" in script or "zed-remote-server-linux" in script:
+        remaining = [line.strip() for line in script.splitlines() if "remote_server" in line]
+        raise ValueError(f"failed to remove Linux remote_server build steps: {remaining}")
     path.write_text(script, encoding="utf-8")
 
 
 def patch_macos_remote_server_build(path: Path) -> None:
     script = path.read_text(encoding="utf-8")
-    script = script.replace(
-        """# Build remote_server in separate invocation to prevent feature unification from other crates
-# from influencing dynamic libraries required by it.
-cargo build ${build_flag} --package remote_server --target $target_triple
-
-""",
+    script = re.sub(
+        r"^# Build remote_server in separate invocation to prevent feature unification from other crates\r?\n"
+        r".*?^cargo [^\r\n]*--package remote_server[^\r\n]*\r?\n\r?\n?",
         "",
+        script,
+        flags=re.MULTILINE | re.DOTALL,
     )
     script = re.sub(
-        r'\n        if ! dsymutil --flat "target/\$\{target_triple\}/\$\{target_dir\}/remote_server" 2> target/dsymutil\.log; then\n'
-        r"            echo \"dsymutil failed\"\n"
-        r"            cat target/dsymutil\.log\n"
-        r"            exit 1\n"
-        r"        fi\n",
+        r'\n[ \t]+if ! dsymutil --flat "target/\$\{target_triple\}/\$\{target_dir\}/remote_server" 2> target/dsymutil\.log; then\r?\n'
+        r"[ \t]+echo \"dsymutil failed\"\r?\n"
+        r"[ \t]+cat target/dsymutil\.log\r?\n"
+        r"[ \t]+exit 1\r?\n"
+        r"[ \t]+fi\r?\n",
         "\n",
         script,
     )
@@ -509,10 +516,13 @@ cargo build ${build_flag} --package remote_server --target $target_triple
     script = "".join(
         line
         for line in script.splitlines(keepends=True)
-        if "--package remote_server" not in line and "zed-remote-server-macos" not in line
+        if "--package remote_server" not in line
+        and "zed-remote-server-macos" not in line
+        and not (line.lstrip().startswith("strip ") and "/remote_server" in line)
     )
-    if "--package remote_server" in script or "zed-remote-server-macos" in script:
-        raise ValueError("failed to remove macOS remote_server build steps")
+    if "remote_server" in script or "zed-remote-server-macos" in script:
+        remaining = [line.strip() for line in script.splitlines() if "remote_server" in line]
+        raise ValueError(f"failed to remove macOS remote_server build steps: {remaining}")
     path.write_text(script, encoding="utf-8")
 
 

@@ -1432,15 +1432,34 @@ class CiReleaseTests(unittest.TestCase):
         script_dir.mkdir(parents=True)
         (script_dir / "bundle-linux").write_text(
             """
-cargo build --release --target "${remote_server_triple}" --package remote_server
-llvm-objcopy --strip-debug "${target_dir}/${remote_server_triple}/release/remote_server"
+musl_triple=${target_triple%-gnu}-musl
+remote_server_triple=${REMOTE_SERVER_TARGET:-"${musl_triple}"}
+rustup_installed=false
+if command -v rustup >/dev/null 2>&1; then
+    rustup_installed=true
+fi
+if "$rustup_installed"; then
+    rustup target add "$remote_server_triple"
+fi
+# Build remote_server in separate invocation to prevent feature unification from other crates
+# from influencing dynamic libraries required by it.
+if [[ "$remote_server_triple" == "$musl_triple" ]]; then
+    export RUSTFLAGS="${RUSTFLAGS:-} -C target-feature=+crt-static"
+    musl_cc_var="CC_$(echo "$remote_server_triple" | tr '-' '_')"
+    export "$musl_cc_var"=musl-gcc
+fi
+cargo --config .cargo/bundle-config.toml build --release --target "${remote_server_triple}" --package remote_server
+llvm-objcopy --only-keep-debug "${target_dir}/${remote_server_triple}/release/remote_server" "${target_dir}/${remote_server_triple}/release/remote_server.dbg"
+llvm-objcopy --strip-debug --discard-all "${target_dir}/${remote_server_triple}/release/remote_server"
 gzip -f --stdout --best "${target_dir}/${remote_server_triple}/release/remote_server" > "${target_dir}/zed-remote-server-linux-${arch}.gz"
 """.lstrip(),
             encoding="utf-8",
         )
         (script_dir / "bundle-mac").write_text(
             """
-cargo build ${build_flag} --package remote_server --target $target_triple
+# Build remote_server in separate invocation to prevent feature unification from other crates
+# from influencing dynamic libraries required by it.
+cargo --config .cargo/bundle-config.toml build ${build_flag} --package remote_server --target $target_triple
 function download_and_unpack() {
     local url=$1
     local path_to_unpack=$2
@@ -1489,6 +1508,14 @@ function download_git() {
 function sign_app_binaries() {
         hdiutil create -volname Zed -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
 }
+function extract_debug_symbols() {
+    if ! dsymutil --flat "target/${target_triple}/${target_dir}/remote_server" 2> target/dsymutil.log; then
+        echo "dsymutil failed"
+        cat target/dsymutil.log
+        exit 1
+    fi
+}
+strip -x "target/${target_triple}/${target_dir}/remote_server"
 sign_binary "target/$target_triple/release/remote_server"
 gzip -f --stdout --best target/$target_triple/release/remote_server > target/zed-remote-server-macos-$arch_suffix.gz
 """.lstrip(),
@@ -1536,9 +1563,9 @@ ZipZedAndItsFriendsDebug
         linux = (script_dir / "bundle-linux").read_text(encoding="utf-8")
         macos = (script_dir / "bundle-mac").read_text(encoding="utf-8")
         windows = (script_dir / "bundle-windows.ps1").read_text(encoding="utf-8")
-        self.assertNotIn("--package remote_server", linux)
+        self.assertNotIn("remote_server", linux)
         self.assertNotIn("zed-remote-server-linux", linux)
-        self.assertNotIn("--package remote_server", macos)
+        self.assertNotIn("remote_server", macos)
         self.assertNotIn("zed-remote-server-macos", macos)
         self.assertIn("function create_dmg_with_retry()", macos)
         self.assertIn("Retrying git binary download", macos)

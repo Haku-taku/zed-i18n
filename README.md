@@ -172,6 +172,8 @@ Most UI strings — menus, buttons, tooltips, settings, action descriptions — 
 
 If you know a way to patch these untranslated areas reliably across Zed versions, contributions are very welcome.
 
+On Linux and Windows, when configuring custom shortcuts for application menus (`app_menu::OpenApplicationMenu`), you can use stable English menu names such as `File`, `Edit`, and `View` so the shortcuts continue to work after changing the UI language. See [Application menu shortcut configuration](docs/menu-access-keys.md) for examples.
+
 ## On AI Usage
 
 Most of the code in this project was written with the help of AI tools, and every translation was produced by AI. Because the translation results were not reviewed by a human, mistranslations or branding issues may exist. If you see a problem with any translation — including this document — or think there is a better rendering, please open an issue or PR.

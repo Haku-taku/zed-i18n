@@ -172,6 +172,8 @@ La plupart des chaînes de l'interface — menus, boutons, infobulles, paramètr
 
 Pour ces parties non traduites, les contributions sur la manière d'appliquer des correctifs de façon fiable entre les versions de Zed sont les bienvenues.
 
+Sous Linux et Windows, lorsque vous configurez des raccourcis personnalisés pour les menus de l'application (`app_menu::OpenApplicationMenu`), vous pouvez utiliser des noms de menu anglais stables tels que `File`, `Edit` et `View`. Les raccourcis continueront ainsi de fonctionner même si vous changez la langue de l'interface. Consultez [Configuration des raccourcis des menus de l'application (en anglais)](../menu-access-keys.md) pour voir des exemples.
+
 ## Sur l'utilisation de l'IA
 
 La majeure partie du code de ce projet a été écrite avec l'aide d'outils d'IA, et chaque traduction a été produite par IA. Les résultats de traduction n'ont pas été directement vérifiés par un humain, des erreurs de traduction et des problèmes de branding restent donc possibles. Si vous remarquez un problème de traduction dans ce document ou ailleurs, ou si vous pensez qu'une meilleure traduction est possible, n'hésitez pas à ouvrir une issue ou une PR.

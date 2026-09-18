@@ -59,6 +59,9 @@ PATCH_TARGETS = (
     "crates/settings_ui/src/pages/sandbox_settings.rs",
     "crates/settings_ui/src/pages/tool_permissions_setup.rs",
     "crates/ui/Cargo.toml",
+    "crates/title_bar/Cargo.toml",
+    "crates/title_bar/src/application_menu.rs",
+    "crates/zed/src/zed/app_menus.rs",
     "crates/ui/src/components/context_menu.rs",
     "crates/zed/Cargo.toml",
     "crates/zed/src/main.rs",
@@ -109,6 +112,16 @@ class RuntimeOverlayPatchTests(unittest.TestCase):
                 if path.is_file()
             },
         )
+
+        menus = self._read("crates/zed/src/zed/app_menus.rs")
+        for name in ("File", "Edit", "Selection", "View", "Go", "Run", "Window", "Help"):
+            self.assertIn(f'name: application_menu_name("{name}")', menus)
+        self.assertIn('if cfg!(target_os = "macos")', menus)
+        application_menu = self._read("crates/title_bar/src/application_menu.rs")
+        self.assertIn("menu_labels::label(&menu_name, window, cx)", application_menu)
+        self.assertIn("menu_labels::matches(&entry.menu.name, &pending_menu_open)", application_menu)
+        self.assertIn("!menu_labels::matches(&e.menu.name, &pending_menu_open)", application_menu)
+        self.assertIn("localization.workspace = true", self._read("crates/title_bar/Cargo.toml"))
 
         settings = self._read("crates/settings_content/src/settings_content.rs")
         self.assertIn("pub struct UiLocale(pub String);", settings)

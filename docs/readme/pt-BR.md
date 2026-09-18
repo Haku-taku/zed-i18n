@@ -172,6 +172,8 @@ A maioria das strings de interface — menus, botões, tooltips, configurações
 
 Para essas partes não traduzidas, contribuições sobre como aplicar patches de maneira confiável entre versões do Zed são muito bem-vindas.
 
+No Linux e no Windows, ao configurar atalhos personalizados para os menus do aplicativo (`app_menu::OpenApplicationMenu`), você pode usar nomes fixos em inglês, como `File`, `Edit` e `View`. Assim, os atalhos continuarão funcionando mesmo após alterar o idioma da interface. Consulte [Como configurar atalhos para os menus do aplicativo (em inglês)](../menu-access-keys.md) para ver exemplos.
+
 ## Sobre o uso de IA
 
 Grande parte do código deste projeto foi escrita com o auxílio de ferramentas de IA, e todas as traduções foram produzidas por IA. Como os resultados das traduções não foram revisados diretamente por humanos, podem ocorrer traduções incorretas ou problemas de branding. Se você encontrar algum problema de tradução — inclusive neste próprio documento — ou achar que uma tradução melhor é possível, sinta-se à vontade para abrir uma issue ou PR.

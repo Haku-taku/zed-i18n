@@ -172,6 +172,8 @@ Die meisten UI-Strings — Menüs, Schaltflächen, Tooltips, Einstellungen, Akti
 
 Für diese nicht übersetzten Teile sind Beiträge willkommen, die zeigen, wie sich Patches zuverlässig über Zed-Versionen hinweg einspielen lassen.
 
+Wenn Sie unter Linux und Windows eigene Tastenkürzel für die Anwendungsmenüs (`app_menu::OpenApplicationMenu`) einrichten, können Sie feste englische Menünamen wie `File`, `Edit` und `View` verwenden. Dadurch funktionieren die Kürzel auch nach einem Wechsel der Oberflächensprache weiter. Beispiele finden Sie unter [Tastenkürzel für Anwendungsmenüs einrichten (Englisch)](../menu-access-keys.md).
+
 ## Hinweis zur KI-Nutzung
 
 Ein Großteil des Codes in diesem Projekt wurde mithilfe von KI-Werkzeugen geschrieben, und jede Übersetzung wurde von KI erstellt. Die Übersetzungsergebnisse wurden nicht direkt von Menschen geprüft, weshalb fehlerhafte Übersetzungen oder Probleme beim Branding möglich sind. Wer in den Übersetzungen — auch in diesem Dokument — ein Problem entdeckt oder eine bessere Übersetzung vorschlagen möchte, kann jederzeit ein Issue oder einen PR eröffnen.

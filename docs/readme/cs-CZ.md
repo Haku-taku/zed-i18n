@@ -172,6 +172,8 @@ Většina UI řetězců — nabídky, tlačítka, tooltipy, nastavení, popisky 
 
 U těchto nepřeložených částí uvítáme příspěvky se způsobem, jak je spolehlivě patchovat napříč různými verzemi Zed.
 
+V Linuxu a ve Windows můžete při vlastním nastavení klávesových zkratek pro nabídky aplikace (`app_menu::OpenApplicationMenu`) použít stálé anglické názvy nabídek, například `File`, `Edit` a `View`. Zkratky tak budou fungovat i po změně jazyka uživatelského rozhraní. Příklady nastavení najdete v dokumentu [Nastavení klávesových zkratek nabídek aplikace (anglicky)](../menu-access-keys.md).
+
 ## Poznámka k použití AI
 
 Většina kódu v tomto projektu byla napsána s pomocí AI nástrojů a každý překlad byl vytvořen AI. Vzhledem k tomu, že výsledky překladů nebyly přímo zkontrolovány člověkem, mohou se vyskytnout chybné překlady i problémy s brandingem. Pokud narazíte na problémy s překladem — včetně tohoto dokumentu — nebo víte o lepším překladu, otevřete prosím issue nebo PR.

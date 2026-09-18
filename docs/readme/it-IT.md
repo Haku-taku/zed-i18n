@@ -172,6 +172,8 @@ La maggior parte delle stringhe dell'interfaccia utente — menu, pulsanti, tool
 
 Per queste parti non tradotte, sono benvenuti i contributi su come applicare patch in modo affidabile tra le versioni di Zed.
 
+Su Linux e Windows, quando si configurano scorciatoie personalizzate per i menu dell'applicazione (`app_menu::OpenApplicationMenu`), è possibile usare nomi di menu inglesi fissi come `File`, `Edit` e `View`. In questo modo le scorciatoie continueranno a funzionare anche dopo aver cambiato la lingua dell'interfaccia. Per alcuni esempi, consultare [Guida alla configurazione delle scorciatoie dei menu dell'applicazione (in inglese)](../menu-access-keys.md).
+
 ## Sull'utilizzo dell'AI
 
 La maggior parte del codice di questo progetto è stata scritta con l'aiuto di strumenti AI, e ogni traduzione è stata prodotta dall'AI. Poiché i risultati delle traduzioni non sono stati revisionati direttamente da persone, potrebbero esserci traduzioni errate o problemi di branding. Se si riscontra un problema di traduzione, anche in questo documento, o si ritiene che sia possibile una traduzione migliore, è possibile aprire una issue o una PR in qualsiasi momento.

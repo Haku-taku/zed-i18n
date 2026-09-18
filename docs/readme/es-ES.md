@@ -172,6 +172,8 @@ La mayoría de las cadenas de la interfaz de usuario —menús, botones, informa
 
 Para estas partes sin traducir, son bienvenidas las contribuciones sobre cómo aplicar parches de manera fiable entre versiones de Zed.
 
+En Linux y Windows, al configurar atajos personalizados para los menús de la aplicación (`app_menu::OpenApplicationMenu`), puedes usar nombres de menú fijos en inglés, como `File`, `Edit` y `View`. De este modo, los atajos seguirán funcionando aunque cambies el idioma de la interfaz. Consulta [Cómo configurar atajos para los menús de la aplicación (en inglés)](../menu-access-keys.md) para ver ejemplos.
+
 ## Sobre el uso de IA
 
 La mayor parte del código de este proyecto se ha escrito con la ayuda de herramientas de IA, y todas las traducciones han sido generadas por IA. Los resultados de la traducción no han sido revisados directamente por personas, por lo que pueden existir traducciones incorrectas o problemas relacionados con la marca. Si detectas algún problema de traducción en este documento o en otras traducciones, o crees que puede haber una traducción mejor, no dudes en abrir una issue o una PR.

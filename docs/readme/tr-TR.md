@@ -172,6 +172,8 @@ Menüler, düğmeler, araç ipuçları, ayarlar ve eylem açıklamaları gibi ar
 
 Çevirisi yapılmamış bu kısımlar için, Zed sürümleri arasında yamaları güvenilir biçimde uygulamanın bir yolunu biliyorsanız katkılarınızı bekliyoruz.
 
+Linux ve Windows'ta uygulama menüleri (`app_menu::OpenApplicationMenu`) için özel kısayollar ayarlarken `File`, `Edit` ve `View` gibi sabit İngilizce menü adlarını kullanabilirsiniz. Böylece arayüz dilini değiştirdiğinizde de kısayollar çalışmaya devam eder. Ayar örnekleri için [Uygulama menüsü kısayollarını yapılandırma (İngilizce)](../menu-access-keys.md) belgesine bakın.
+
 ## Yapay Zeka Kullanımı Hakkında
 
 Bu projedeki kodun büyük bölümü yapay zeka araçlarının yardımıyla yazılmış olup tüm çeviriler yapay zeka tarafından üretilmiştir. Çeviri sonuçları doğrudan insan denetiminden geçmediği için hatalı çeviriler veya markalama sorunları olabilir. Bu belge de dahil olmak üzere çevirilerde bir sorun olduğunu düşünüyorsanız ya da daha iyi bir çeviri öneriniz varsa, lütfen issue veya PR açmaktan çekinmeyin.

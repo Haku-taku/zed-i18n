@@ -172,7 +172,7 @@ Most UI strings — menus, buttons, tooltips, settings, action descriptions — 
 
 If you know a way to patch these untranslated areas reliably across Zed versions, contributions are very welcome.
 
-On Linux and Windows, the application menu bar (File, Edit, View, ...) accepts stable English keymap names so Alt+letter bindings keep working across a display-language change. See [Keyboard access to localized menus](docs/menu-access-keys.md) for details.
+On Linux and Windows, when configuring custom shortcuts for application menus (`app_menu::OpenApplicationMenu`), you can use stable English menu names such as `File`, `Edit`, and `View` so the shortcuts continue to work after changing the UI language. See [Application menu shortcut configuration](docs/menu-access-keys.md) for examples.
 
 ## On AI Usage
 

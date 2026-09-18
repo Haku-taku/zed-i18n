@@ -172,6 +172,8 @@ Większość ciągów interfejsu użytkownika — menu, przyciski, podpowiedzi, 
 
 W odniesieniu do tych nieprzetłumaczonych fragmentów chętnie przyjmiemy wkład dotyczący sposobu niezawodnego stosowania poprawek w różnych wersjach Zed.
 
+W systemach Linux i Windows podczas samodzielnego konfigurowania skrótów do menu aplikacji (`app_menu::OpenApplicationMenu`) można używać stałych angielskich nazw menu, takich jak `File`, `Edit` i `View`. Dzięki temu skróty będą działać również po zmianie języka interfejsu. Przykłady znajdziesz w dokumencie [Konfigurowanie skrótów menu aplikacji (w języku angielskim)](../menu-access-keys.md).
+
 ## Informacja o użyciu AI
 
 Większość kodu w tym projekcie została napisana przy pomocy narzędzi AI, a wszystkie tłumaczenia zostały wygenerowane przez AI. Wyniki tłumaczeń nie zostały bezpośrednio zweryfikowane przez człowieka, dlatego możliwe są błędy w tłumaczeniach oraz kwestie związane z brandingiem. Jeśli zauważysz problem z tłumaczeniem — także w tym dokumencie — albo masz propozycję lepszego tłumaczenia, zapraszamy do zgłoszenia issue lub otwarcia PR-a.

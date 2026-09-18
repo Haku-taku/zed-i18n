@@ -126,9 +126,10 @@ class UniversalApplyContractTests(unittest.TestCase):
             )
             self.assertNotIn('                "Zed-i18n Repository",', app_menus)
 
-        # The Go menu title is translated while the identical debug-adapter
-        # language identifier stays a bare literal (registry match target).
-        self.assertIn('name: localization::localized_str!("Go").into()', app_menus)
+        # Client-side menus keep their action identity; the renderer translates
+        # the label. Native macOS menu titles are still translated at creation.
+        self.assertIn('name: application_menu_name("Go")', app_menus)
+        self.assertIn('localization::translate_static(name)', app_menus)
         go_adapter = (
             self.zed_root / "crates" / "dap_adapters" / "src" / "go.rs"
         ).read_text(encoding="utf-8")

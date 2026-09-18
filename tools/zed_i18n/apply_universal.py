@@ -457,6 +457,7 @@ def _plan_zed_runtime_patches(
         "crates/zed/src/zed/ui_locale.rs",
         "crates/settings_ui/src/components/locale_picker.rs",
         "crates/language_selector/src/localized_language_name.rs",
+        "crates/title_bar/src/application_menu/menu_labels.rs",
     ):
         source = overlay_root / relative
         if not source.exists():
@@ -496,6 +497,72 @@ def _plan_zed_runtime_patches(
             f"{after}.workspace = true\n",
             f"{after}.workspace = true\n{name}.workspace = true\n",
         )
+
+    # Client-side menu actions need stable names even when the labels change.
+    # Keep macOS native menu titles localized as before.
+    app_menus_path = zed_root / "crates/zed/src/zed/app_menus.rs"
+    app_menus_text = planned.get(app_menus_path)
+    if app_menus_text is None:
+        app_menus_text = app_menus_path.read_text(encoding="utf-8")
+    for name in ("Zed", "File", "Edit", "Selection", "View", "Go", "Run", "Window", "Help"):
+        replacement = f'name: application_menu_name("{name}"),'
+        if replacement in app_menus_text:
+            continue
+        candidates = (
+            f'name: localization::localized_str!("{name}").into(),',
+            f'name: "{name}".into(),',
+        )
+        matches = [candidate for candidate in candidates if candidate in app_menus_text]
+        if len(matches) != 1 or app_menus_text.count(matches[0]) != 1:
+            raise ValueError(f"expected one application menu title: {name}")
+        app_menus_text = app_menus_text.replace(matches[0], replacement, 1)
+    planned[app_menus_path] = app_menus_text
+    patch(
+        "crates/zed/src/zed/app_menus.rs",
+        "pub fn app_menus(cx: &mut App) -> Vec<Menu> {",
+        '''fn application_menu_name(name: &'static str) -> gpui::SharedString {
+    if cfg!(target_os = "macos") {
+        localization::translate_static(name).into()
+    } else {
+        name.into()
+    }
+}
+
+pub fn app_menus(cx: &mut App) -> Vec<Menu> {''',
+    )
+    dependency("crates/title_bar/Cargo.toml", "anyhow", "localization")
+    patch(
+        "crates/title_bar/src/application_menu.rs",
+        "pub struct OpenApplicationMenu(String);",
+        "pub struct OpenApplicationMenu(String);\n\nmod menu_labels;",
+    )
+    patch(
+        "crates/title_bar/src/application_menu.rs",
+        "fn render_standard_menu(&self, entry: &MenuEntry) -> impl IntoElement {",
+        "fn render_standard_menu(&self, entry: &MenuEntry, window: &Window, cx: &App) -> impl IntoElement {",
+    )
+    patch(
+        "crates/title_bar/src/application_menu.rs",
+        '''                            menu_name,
+                        )''',
+        '''                            menu_labels::label(&menu_name, window, cx),
+                        )''',
+    )
+    patch(
+        "crates/title_bar/src/application_menu.rs",
+        ".map(|entry| self.render_standard_menu(entry)),",
+        ".map(|entry| self.render_standard_menu(entry, window, cx)),",
+    )
+    patch(
+        "crates/title_bar/src/application_menu.rs",
+        "entry.menu.name == pending_menu_open && !entry.handle.is_deployed()",
+        "menu_labels::matches(&entry.menu.name, &pending_menu_open) && !entry.handle.is_deployed()",
+    )
+    patch(
+        "crates/title_bar/src/application_menu.rs",
+        "e.menu.name != pending_menu_open && e.handle.is_deployed()",
+        "!menu_labels::matches(&e.menu.name, &pending_menu_open) && e.handle.is_deployed()",
+    )
 
     patch(
         "Cargo.toml",

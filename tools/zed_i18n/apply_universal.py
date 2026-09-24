@@ -1226,7 +1226,50 @@ fn initialization_sequence_label() -> &'static str {
         "Label::new(SUBSCRIPTION_DESCRIPTION)",
         "Label::new(subscription_description())",
     )
+    patch(
+        "crates/language_models/src/provider/x_ai_subscribed.rs",
+        '''const SUBSCRIPTION_DESCRIPTION: &str =
+    "Sign in with your SuperGrok subscription to use Grok models in Zed's agent.";''',
+        '''fn subscription_description() -> &'static str {
+    localization::localized_str!(
+        "Sign in with your SuperGrok subscription to use Grok models in Zed's agent."
+    )
+}''',
+    )
+    patch(
+        "crates/language_models/src/provider/x_ai_subscribed.rs",
+        "SUBSCRIPTION_DESCRIPTION.into()",
+        "subscription_description().into()",
+    )
+    patch(
+        "crates/language_models/src/provider/x_ai_subscribed.rs",
+        "Label::new(SUBSCRIPTION_DESCRIPTION)",
+        "Label::new(subscription_description())",
+    )
     dependency("crates/language_models/Cargo.toml", "anyhow", "localization")
+
+    patch(
+        "crates/x_ai_subscribed/src/x_ai_subscribed.rs",
+        "message: INFERENCE_FORBIDDEN_MESSAGE.to_string(),",
+        "message: localization::translate_static(INFERENCE_FORBIDDEN_MESSAGE).to_string(),",
+    )
+    dependency("crates/x_ai_subscribed/Cargo.toml", "language_model", "localization")
+
+    patch(
+        "crates/extensions_ui/src/extension_suggest.rs",
+        "SharedString::new_static(suggestion.description)",
+        "SharedString::new_static(localization::translate_static(suggestion.description))",
+    )
+    patch(
+        "crates/extensions_ui/src/extension_suggest.rs",
+        ".with_title(suggestion.title)",
+        ".with_title(localization::translate_static(suggestion.title))",
+    )
+    patch(
+        "crates/extensions_ui/src/extension_suggest.rs",
+        ".primary_message(suggestion.install_message)",
+        ".primary_message(localization::translate_static(suggestion.install_message))",
+    )
 
     patch(
         "crates/multi_buffer/src/multi_buffer.rs",
@@ -1472,6 +1515,11 @@ _EXPECTED_MANUAL_SITES: frozenset[tuple[str, str]] = frozenset({
     ("crates/language_model/src/registry.rs", "LLM provider is not configured or does not support the configured model."),
     ("crates/language_model/src/registry.rs", "{} LLM provider is not configured."),
     ("crates/language_models/src/provider/openai_subscribed.rs", "Sign in with your ChatGPT Plus or Pro subscription to use OpenAI models in Zed's agent."),
+    ("crates/language_models/src/provider/x_ai_subscribed.rs", "Sign in with your SuperGrok subscription to use Grok models in Zed's agent."),
+    ("crates/x_ai_subscribed/src/x_ai_subscribed.rs", "Login succeeded, but this Grok account cannot use the API (HTTP 403). Some plans do not include this access. You can also use the separate xAI provider with an API key from console.x.ai."),
+    ("crates/extensions_ui/src/extension_suggest.rs", "Emmet expands abbreviations such as `ul>li*3` into HTML and `m10` into CSS."),
+    ("crates/extensions_ui/src/extension_suggest.rs", "Emmet is available for this file"),
+    ("crates/extensions_ui/src/extension_suggest.rs", "Install Emmet"),
     ("crates/multi_buffer/src/multi_buffer.rs", "untitled"),
     ("crates/onboarding/src/basics_page.rs", "Dark"),
     ("crates/onboarding/src/basics_page.rs", "Light"),

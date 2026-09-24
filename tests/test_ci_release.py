@@ -1846,6 +1846,26 @@ function download_git() {
             workflow.index("ci_release metadata"),
         )
 
+    def test_release_workflow_publishes_when_platform_jobs_were_skipped(self) -> None:
+        # A run scoped to fewer platforms skips the other build jobs, and a
+        # skipped job propagates through `needs` transitively. `publish` needs
+        # `package`, so without always() it is skipped too -- a run that built
+        # and packaged everything publishes nothing. Verified on a fork: a
+        # Linux-only run skipped publish while its `if` was plainly true.
+        workflow = (Path.cwd() / ".github" / "workflows" / "i18n-release.yml").read_text(
+            encoding="utf-8"
+        )
+        publish = workflow[workflow.index("  publish:") :]
+        condition = publish[: publish.index("runs-on:")]
+
+        self.assertIn("always()", condition)
+        self.assertIn("needs.package.result == 'success'", condition)
+        self.assertIn("inputs.upload_to_release", condition)
+
+        # `package` already depends on every build job, so its result is the
+        # gate; listing them again here is what the transitive skip defeated.
+        self.assertIn("always()", workflow[workflow.index("  package:") :][:2000])
+
 
 if __name__ == "__main__":
     unittest.main()

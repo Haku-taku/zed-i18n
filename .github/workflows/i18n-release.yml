@@ -674,7 +674,20 @@ jobs:
     needs:
       - prepare
       - package
-    if: startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release
+    # always() is load-bearing, not defensive. A run scoped away from a
+    # platform -- --platforms linux, or any run on a fork without the Apple and
+    # Azure secrets -- skips those build jobs, and a skipped job propagates
+    # through `needs` transitively: `package` absorbs it with its own always(),
+    # but `publish` needs `package`, so without one here it is skipped too and a
+    # run that built and packaged everything publishes nothing. Upstream never
+    # hit this because its releases build every platform.
+    if: >-
+      ${{
+        always() &&
+        needs.prepare.result == 'success' &&
+        needs.package.result == 'success' &&
+        (startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release)
+      }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write

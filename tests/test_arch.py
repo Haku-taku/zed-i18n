@@ -32,16 +32,19 @@ FIXTURE_DESKTOP = (
     "Name=Open a new workspace\n"
 )
 
-# Stands in for the real CLI: the staging step runs `bin/zed --completions
+# Stands in for the real CLI: the staging step runs `<name> --completions
 # <shell>` and captures stdout, so a canned emitter exercises the same path
-# without needing a Zed build.
+# without needing a Zed build. It reports the name it was invoked as, because
+# the real CLI names its completions after argv[0] -- running it as `zed`
+# produces completions for a command called `zed`, which would never fire for
+# the installed `zeditor`.
 FIXTURE_CLI = (
     "#!/bin/sh\n"
     'if [ "$1" != "--completions" ]; then\n'
     '  echo "unexpected arguments: $*" >&2\n'
     "  exit 1\n"
     "fi\n"
-    'echo "# canned $2 completion for zeditor"\n'
+    'echo "# canned $2 completion for $(basename "$0")"\n'
 )
 
 COMPLETIONS = {
@@ -287,6 +290,24 @@ class ArchTests(unittest.TestCase):
         )
         for path in built:
             self.assertEqual(set(self.read_members(path)), EXPECTED_FILES)
+
+    def test_build_release_arch_ignores_its_own_output(self) -> None:
+        # find_linux_tarballs anchors on .tar.gz before the -pkgdir suffix, so a
+        # dist dir that already holds staged trees -- a re-run, or a workflow
+        # that builds debs and Arch trees in the same directory -- still finds
+        # exactly the two release archives and nothing else.
+        dist_dir = self.temp_root / "dist"
+        for arch in ("x86_64", "aarch64"):
+            self.make_tarball(dist_dir / f"zed-i18n-linux-{arch}.tar.gz")
+        self.make_tarball(dist_dir / "zed-i18n-linux-x86_64-pkgdir.tar.gz")
+        (dist_dir / "zed-i18n-linux-x86_64.deb").write_bytes(b"deb")
+
+        built = build_release_arch(dist_dir)
+
+        self.assertEqual(
+            sorted(path.name for path in built),
+            ["zed-i18n-linux-aarch64-pkgdir.tar.gz", "zed-i18n-linux-x86_64-pkgdir.tar.gz"],
+        )
 
 
 if __name__ == "__main__":

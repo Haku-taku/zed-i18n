@@ -591,10 +591,11 @@ jobs:
 
           digests=()
           for tree in "${trees[@]}"; do
-            # Read the listing through process substitution rather than a pipe:
-            # grep -q exits on the first match, and as a pipeline stage under
-            # pipefail that SIGPIPEs tar and fails the step spuriously.
-            if ! grep -qx 'usr/bin/zeditor' < <(tar -tzf "$tree"); then
+            # Naming the member lets tar do the check itself: it exits 0 when
+            # the member is present and 2 when it is not. Piping a listing into
+            # `grep -q` instead closes the pipe on the first match, which makes
+            # tar die with "stdout: write error" even on success.
+            if ! tar -tzf "$tree" usr/bin/zeditor > /dev/null; then
               echo "Staged tree is missing usr/bin/zeditor: $tree" >&2
               exit 1
             fi

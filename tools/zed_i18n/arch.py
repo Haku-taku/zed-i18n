@@ -25,6 +25,7 @@ import gzip
 import io
 import os
 import platform
+import shutil
 import subprocess
 import tarfile
 import tempfile
@@ -138,14 +139,24 @@ def generate_completions(
 
     Completion scripts describe the CLI's argument parser, which does not vary
     by architecture, so one run covers every Linux build in a release.
+
+    The CLI has to be invoked under the name the package installs it as. clap
+    derives the generated function name, the zsh ``#compdef`` line and the fish
+    ``complete -c`` target from argv[0], so running the bundle's ``bin/zed``
+    yields completions for a command called ``zed`` -- which would never fire
+    for the installed ``zeditor``. The copy stays beside the original so the
+    CLI's own ``../libexec/zed-editor`` lookup still resolves.
     """
     with tempfile.TemporaryDirectory(prefix="zed-i18n-completions-") as temp_dir:
         workdir = Path(temp_dir)
         root = extract_bundle(tarball_path, workdir)
-        cli = workdir / root / "bin" / "zed"
-        if not cli.is_file():
+        launcher = workdir / root / "bin" / "zed"
+        if not launcher.is_file():
             raise ValueError(f"release archive has no bin/zed launcher: {tarball_path.name}")
-        cli.chmod(0o755)
+        launcher.chmod(0o755)
+
+        cli = launcher.with_name(BIN_NAME)
+        shutil.copy2(launcher, cli)
 
         # A throwaway HOME keeps the CLI from reading or writing a real profile.
         home = workdir / "home"

@@ -359,12 +359,22 @@ class PkgbuildRenderTests(unittest.TestCase):
         self.assertIn(f"sha256sums_x86_64=('{'1' * 64}')\n", rendered)
         self.assertIn(f"sha256sums_aarch64=('{'2' * 64}')\n", rendered)
 
-    def test_replaces_the_placeholder_digests(self) -> None:
-        # The template's zero digests fail makepkg loudly; a render that left
-        # them in place would publish a PKGBUILD nothing can build.
+    def test_replaces_the_templates_own_digest_lines(self) -> None:
+        # Whatever the template carries -- the zeros that ship now, or a
+        # previous release's digests copied back into it -- has to be replaced
+        # rather than merged with, or the released PKGBUILD would fail
+        # verification against the trees sitting beside it.
         template = PKGBUILD_TEMPLATE.read_text(encoding="utf-8")
-        self.assertIn("0" * 64, template)
-        self.assertNotIn("0" * 64, self.render())
+        rendered = self.render()
+
+        def line_for(text: str, arch: str) -> str:
+            return next(
+                line for line in text.splitlines() if line.startswith(f"sha256sums_{arch}=")
+            )
+
+        for arch in SUPPORTED_ARCHES:
+            self.assertNotEqual(line_for(template, arch), line_for(rendered, arch))
+            self.assertEqual(line_for(rendered, arch), f"sha256sums_{arch}=('{self.DIGESTS[arch]}')")
 
     def test_leaves_every_release_independent_line_alone(self) -> None:
         template = PKGBUILD_TEMPLATE.read_text(encoding="utf-8")

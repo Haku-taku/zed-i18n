@@ -1,0 +1,49 @@
+name: probe-gate
+
+# TEMPORARY DIAGNOSTIC -- delete after reading the output.
+#
+# i18n-release.yml's publish job is being skipped on workflow_dispatch even
+# when github.ref is a tag ref and upload_to_release=true, so this mirrors its
+# exact gate on a workflow that costs seconds to run instead of ~1.5 hours.
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_release:
+        description: "mirrors the release workflow's boolean input"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  report:
+    name: Report contexts
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Report
+        run: |
+          echo "github.ref=[${{ github.ref }}]"
+          echo "github.ref_name=[${{ github.ref_name }}]"
+          echo "github.event_name=[${{ github.event_name }}]"
+          echo "startsWith(refs/tags/)=[${{ startsWith(github.ref, 'refs/tags/') }}]"
+          echo "inputs.upload_to_release=[${{ inputs.upload_to_release }}]"
+          echo "inputs json=[${{ toJSON(inputs) }}]"
+          echo "full gate=[${{ startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release }}]"
+
+  gated:
+    name: Gated job mirroring publish
+    needs: report
+    if: startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "GATED JOB RAN"
+
+  gated-with-always:
+    name: Gated job with always()
+    needs: report
+    if: ${{ always() && (startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "GATED-WITH-ALWAYS JOB RAN"

@@ -83,6 +83,25 @@ def sample_manifest(locales: tuple[str, ...] = ("ja-JP", "ko-KR")) -> dict[str, 
                     "x86_64",
                     f"win-x64-{locale}",
                 ),
+                # Homebrew and Scoop have no use for the Arch staging trees, but
+                # they ship in the same manifest, so these have to be ignored
+                # rather than rejected.
+                release_asset(
+                    f"zed-i18n-{locale}-linux-aarch64-pkgdir.tar.gz",
+                    "arch_package",
+                    locale,
+                    "linux",
+                    "aarch64",
+                    f"linux-arm-{locale}",
+                ),
+                release_asset(
+                    f"zed-i18n-{locale}-linux-x86_64-pkgdir.tar.gz",
+                    "arch_package",
+                    locale,
+                    "linux",
+                    "x86_64",
+                    f"linux-intel-{locale}",
+                ),
             ]
         )
     return {
@@ -137,6 +156,21 @@ def sample_universal_manifest(
         ),
         universal_release_asset(
             "zed-i18n-linux-x86_64.deb", "deb_package", "linux", "x86_64", "deb-x64"
+        ),
+        # Ignored by both generators: they select strictly by kind.
+        universal_release_asset(
+            "zed-i18n-linux-aarch64-pkgdir.tar.gz",
+            "arch_package",
+            "linux",
+            "aarch64",
+            "arch-arm",
+        ),
+        universal_release_asset(
+            "zed-i18n-linux-x86_64-pkgdir.tar.gz",
+            "arch_package",
+            "linux",
+            "x86_64",
+            "arch-x64",
         ),
     ]
     for locale in alias_locales:

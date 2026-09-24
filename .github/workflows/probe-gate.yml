@@ -1,0 +1,94 @@
+name: probe-gate
+
+# TEMPORARY DIAGNOSTIC -- delete after reading the output.
+#
+# The publish fix in i18n-release.yml assumes always() on the leaf defeats the
+# transitive skip it inherited from a skipped platform build. That assumption is
+# the whole ~1.5h bet, so it gets tested here directly instead of inference.
+#
+# Mirrors the real shape: a skipped root (macOS/Windows), a middle that absorbs
+# the skip with always() (package), and two leaves differing ONLY by always().
+# Dispatch this with upload_to_release=true, so the gate itself is not the
+# variable under test.
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_release:
+        description: "mirrors the release workflow's boolean input"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  skipped-root:
+    name: Skipped root (like macOS/Windows)
+    runs-on: ubuntu-24.04
+    if: ${{ false }}
+    steps:
+      - name: Never
+        run: echo "should not run"
+
+  prepare:
+    name: Prepare (like prepare)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "PREPARE RAN"
+
+  package:
+    name: Package (like package)
+    needs: skipped-root
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "PACKAGE RAN"
+
+  publish-old:
+    name: Publish WITHOUT always (the old gate)
+    needs: [prepare, package]
+    if: startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "PUBLISH-OLD RAN"
+
+  publish-fixed:
+    name: Publish WITH always (the new gate)
+    needs: [prepare, package]
+    if: >-
+      ${{
+        always() &&
+        needs.prepare.result == 'success' &&
+        needs.package.result == 'success' &&
+        (startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release)
+      }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "PUBLISH-FIXED RAN"
+
+  # If always() works, the two guards below should hold in publish-fixed's
+  # environment. If needs.package.result were 'skipped' instead of 'success',
+  # publish-fixed would still be skipped and the fix would be wrong.
+  report:
+    name: Report
+    needs: [publish-old, publish-fixed]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Summarize
+        run: |
+          {
+            echo "| job | result |"
+            echo "| --- | --- |"
+            echo "| prepare | ${{ needs.prepare.result }} |"
+            echo "| package | ${{ needs.package.result }} |"
+            echo "| publish-old | ${{ needs.publish-old.result }} |"
+            echo "| publish-fixed | ${{ needs.publish-fixed.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "prepare=${{ needs.prepare.result }}"
+          echo "package=${{ needs.package.result }}"
+          echo "publish-old=${{ needs.publish-old.result }}"
+          echo "publish-fixed=${{ needs.publish-fixed.result }}"

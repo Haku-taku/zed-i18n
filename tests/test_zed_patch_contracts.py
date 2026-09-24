@@ -198,5 +198,54 @@ class ZedPatchContractTests(unittest.TestCase):
         self.assertEqual(matches[0].rule.visible_args, (1,))
 
 
+class ArchOverlayContractTests(unittest.TestCase):
+    """The vendored AppStream template has to track the Zed checkout it came from.
+
+    tools/zed_i18n/arch.py renders tools/zed_i18n/arch_overlay/zed.metainfo.xml.in
+    because the release workflow's package job has no Zed checkout to read it
+    from. That vendoring is a copy, so it can silently drift when Zed changes the
+    template -- which would ship an AppStream file that no longer matches the
+    upstream identity, branding or release-entry structure.
+    """
+
+    UPSTREAM_PATH = "crates/zed/resources/flatpak/zed.metainfo.xml.in"
+    VENDORED_PATH = Path("tools") / "zed_i18n" / "arch_overlay" / "zed.metainfo.xml.in"
+
+    def setUp(self) -> None:
+        self.root = Path.cwd()
+        self.require_contract = os.environ.get("ZED_I18N_REQUIRE_ZED_PATCH_CONTRACT") == "1"
+        self.vendored = self.root / self.VENDORED_PATH
+        self.upstream = self.resolve_upstream()
+
+    def resolve_upstream(self) -> Path:
+        path = zed_checkout_path(self.root, load_project_config(self.root))
+        candidate = path / self.UPSTREAM_PATH
+        if candidate.exists():
+            return candidate
+        message = f"Zed metainfo template not available for overlay contract test: {candidate}"
+        if self.require_contract:
+            self.fail(message)
+        self.skipTest(message)
+
+    def test_vendored_metainfo_is_byte_identical_to_the_zed_checkout(self) -> None:
+        # Byte-identical rather than semantically equivalent: arch.py substitutes
+        # the same variables the official PKGBUILD's envsubst does, so any edit
+        # upstream -- including one that only touches whitespace -- has to be
+        # re-vendored rather than quietly diverging.
+        self.assertEqual(
+            self.vendored.read_bytes(),
+            self.upstream.read_bytes(),
+            f"{self.VENDORED_PATH} has drifted from {self.UPSTREAM_PATH}; "
+            "re-copy it and re-run tests/test_arch.py",
+        )
+
+    def test_vendored_metainfo_keeps_the_placeholders_arch_py_substitutes(self) -> None:
+        text = self.vendored.read_text(encoding="utf-8")
+        for placeholder in ("$APP_ID", "$APP_NAME", "$BRANDING_LIGHT", "$BRANDING_DARK"):
+            self.assertIn(placeholder, text)
+        # arch.py drops this line; upstream must still be the one supplying it.
+        self.assertIn("@release_info@", text)
+
+
 if __name__ == "__main__":
     unittest.main()

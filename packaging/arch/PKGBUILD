@@ -1,0 +1,77 @@
+# Maintainer: Haku-taku <https://github.com/Haku-taku>
+#
+# Zed with the community translation set from https://github.com/LI-NA/zed-i18n.
+#
+# Unlike a conventional PKGBUILD this one compiles nothing. The zed-i18n release
+# workflow already built the editor in CI and published a tarball that is staged
+# in exactly the layout the official Arch package installs
+# (https://gitlab.archlinux.org/archlinux/packaging/packages/zed), so package()
+# only has to copy that tree into $pkgdir. The staging rules live in
+# tools/zed_i18n/arch.py; this file and that module have to agree on the layout.
+#
+# $CARCH selects the matching release asset. Both architectures carry the same
+# translations; completions are generated once in CI from the x86_64 build
+# because they describe the CLI's argument parser, which does not vary.
+
+pkgname=zed-i18n
+pkgver=1.20.2
+pkgrel=1
+pkgdesc='A high-performance, multiplayer code editor from the creators of Atom and Tree-sitter, with community translations'
+arch=(x86_64 aarch64)
+url=https://github.com/LI-NA/zed-i18n
+license=(GPL-3.0-or-later AGPL-3.0-or-later Apache-2.0)
+# Mirrors the official zed package. makedepends is empty on purpose: this
+# package installs a prebuilt tree and never invokes a compiler.
+depends=(alsa-lib
+         curl
+         fontconfig
+         git
+         glib2
+         glibc # libc.so libm.so ld-linux-x86_64.so
+         libgcc
+         libstdc++
+         libxcb # libxcb.so libxcb-xkb.so
+         libx11 # libX11-xcb.so
+         libxkbcommon
+         libxkbcommon-x11
+         netcat
+         'nodejs>=18'
+         npm
+         sqlite
+         vulkan-driver
+         vulkan-icd-loader
+         vulkan-tools
+         wayland
+         zstd)
+makedepends=()
+optdepends=('org.freedesktop.secrets: to keep you logged into your Zed account')
+# The staged tree installs /usr/bin/zeditor, /usr/lib/zed/zed-editor and
+# dev.zed.Zed.desktop -- byte-for-byte the paths the official package owns -- so
+# this is a drop-in replacement for it rather than a parallel install.
+provides=(zed)
+conflicts=(zed)
+replaces=(zed-editor)
+
+# The i18n revision that this pkgver was cut from. zed-i18n addresses every
+# translation by byte offset in one pinned Zed revision, so pkgver cannot move
+# independently of it; a new revision of the same Zed version is published under
+# a new tag and is picked up by bumping _i18nrev and pkgrel together.
+_i18nrev=3
+_tag="v$pkgver-i18n.$_i18nrev"
+
+source_x86_64=("$url/releases/download/$_tag/zed-i18n-linux-x86_64-pkgdir.tar.gz")
+source_aarch64=("$url/releases/download/$_tag/zed-i18n-linux-aarch64-pkgdir.tar.gz")
+
+# TODO: replace both with the digests the release workflow prints into its
+# "Arch Linux staging trees" job summary (also in the release's SHA256SUMS.txt).
+# The zeros below are deliberate: they fail verification loudly, so a package
+# built before these are filled in cannot be mistaken for a verified one.
+sha256sums_x86_64=('0000000000000000000000000000000000000000000000000000000000000000')
+sha256sums_aarch64=('0000000000000000000000000000000000000000000000000000000000000000')
+
+package() {
+	# The tarball is rooted at usr/, so makepkg has already unpacked the whole
+	# staging tree into $srcdir/usr. Copying it wholesale is the entire install
+	# step -- there is nothing to relocate, rename or strip.
+	cp -a --no-preserve=ownership "$srcdir/usr" "$pkgdir/"
+}

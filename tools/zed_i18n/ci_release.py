@@ -19,6 +19,7 @@ import zipfile
 
 from .apply import apply_translations
 from .apply_universal import apply_universal
+from .arch import arch_asset_name, build_release_arch
 from .config import load_project_config, zed_checkout_path
 from .deb import build_release_debs, deb_asset_name
 from .distribution import (
@@ -854,6 +855,7 @@ def app_asset_names(language: str | None, platform: str, arch: str) -> list[str]
     names = [app_asset_name(language, platform, arch)]
     if platform == "linux":
         names.append(deb_asset_name(language, arch))
+        names.append(arch_asset_name(language, arch))
     if platform == "windows":
         names.append(windows_portable_asset_name(language, arch))
     return names
@@ -1281,6 +1283,11 @@ APP_PATTERNS = (
         "deb_package",
     ),
     (
+        re.compile(r"^zed-i18n-linux-(?P<arch>x86_64|aarch64)-pkgdir\.tar\.gz$"),
+        "linux",
+        "arch_package",
+    ),
+    (
         re.compile(r"^Zed-i18n-macos-(?P<arch>x86_64|aarch64)\.dmg$"),
         "macos",
         "app",
@@ -1305,6 +1312,11 @@ APP_PATTERNS = (
         re.compile(r"^zed-i18n-(?P<locale>.+)-linux-(?P<arch>x86_64|aarch64)\.deb$"),
         "linux",
         "deb_package",
+    ),
+    (
+        re.compile(r"^zed-i18n-(?P<locale>.+)-linux-(?P<arch>x86_64|aarch64)-pkgdir\.tar\.gz$"),
+        "linux",
+        "arch_package",
     ),
     (
         re.compile(r"^Zed-i18n-(?P<locale>.+)-macos-(?P<arch>x86_64|aarch64)\.dmg$"),
@@ -1549,6 +1561,10 @@ def build_parser() -> argparse.ArgumentParser:
     debs_parser.add_argument("--repository")
     debs_parser.add_argument("--max-workers", type=int)
 
+    arch_parser = subparsers.add_parser("build-arch")
+    arch_parser.add_argument("--dist-dir", required=True)
+    arch_parser.add_argument("--max-workers", type=int)
+
     metadata_parser = subparsers.add_parser("metadata")
     metadata_parser.add_argument("--dist-dir", required=True)
     metadata_parser.add_argument("--manifest", required=True)
@@ -1640,6 +1656,16 @@ def main(argv: list[str] | None = None) -> int:
                 print("No Linux release archives found; no Debian packages were built.")
             for deb in debs:
                 print(f"Built {deb.name} ({deb.stat().st_size} bytes)")
+            return 0
+        if args.command == "build-arch":
+            arch_packages = build_release_arch(
+                ensure_inside_workspace(root, Path(args.dist_dir).resolve()),
+                max_workers=args.max_workers,
+            )
+            if not arch_packages:
+                print("No Linux release archives found; no Arch packages were built.")
+            for package in arch_packages:
+                print(f"Built {package.name} ({package.stat().st_size} bytes)")
             return 0
         if args.command == "metadata":
             expected_assets = None

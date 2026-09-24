@@ -219,7 +219,7 @@ def control_file(
 
 
 @dataclass(frozen=True)
-class _GeneratedFile:
+class GeneratedFile:
     name: str
     data: bytes
     mode: int
@@ -237,7 +237,7 @@ class _Md5Reader:
         return chunk
 
 
-def _tar_entry(name: str, *, mode: int, mtime: int, typ: bytes = tarfile.REGTYPE) -> tarfile.TarInfo:
+def tar_entry(name: str, *, mode: int, mtime: int, typ: bytes = tarfile.REGTYPE) -> tarfile.TarInfo:
     info = tarfile.TarInfo(name)
     info.mode = mode
     info.mtime = mtime
@@ -249,11 +249,11 @@ def _tar_entry(name: str, *, mode: int, mtime: int, typ: bytes = tarfile.REGTYPE
     return info
 
 
-def _normalized_file_mode(mode: int) -> int:
+def normalized_file_mode(mode: int) -> int:
     return 0o755 if mode & 0o111 else 0o644
 
 
-def _app_root(members: Iterable[tarfile.TarInfo]) -> str:
+def app_root(members: Iterable[tarfile.TarInfo]) -> str:
     roots = {PurePosixPath(member.name).parts[0] for member in members}
     if len(roots) != 1:
         raise ValueError(f"expected a single top-level directory, found: {sorted(roots)}")
@@ -263,7 +263,7 @@ def _app_root(members: Iterable[tarfile.TarInfo]) -> str:
     return root
 
 
-def _read_member(archive: tarfile.TarFile, member: tarfile.TarInfo) -> bytes:
+def read_member(archive: tarfile.TarFile, member: tarfile.TarInfo) -> bytes:
     stream = archive.extractfile(member)
     if stream is None:
         raise ValueError(f"cannot read archive member: {member.name}")
@@ -306,10 +306,10 @@ def _write_ar_archive(
 def _build_control_tar(control: str, md5sums: str, mtime: int) -> bytes:
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.GNU_FORMAT) as tar:
-        tar.addfile(_tar_entry("./", mode=0o755, mtime=mtime, typ=tarfile.DIRTYPE))
+        tar.addfile(tar_entry("./", mode=0o755, mtime=mtime, typ=tarfile.DIRTYPE))
         for name, text in (("./control", control), ("./md5sums", md5sums)):
             data = text.encode("utf-8")
-            info = _tar_entry(name, mode=0o644, mtime=mtime)
+            info = tar_entry(name, mode=0o644, mtime=mtime)
             info.size = len(data)
             tar.addfile(info, io.BytesIO(data))
     return gzip.compress(buffer.getvalue(), 9, mtime=0)
@@ -333,18 +333,18 @@ def build_deb_from_tarball(
     with tarfile.open(tarball_path, "r:gz") as archive:
         members = archive.getmembers()
         validate_archive_members(members)
-        app_root = _app_root(members)
+        bundle_root = app_root(members)
         mtime = max((member.mtime for member in members), default=0)
 
         def remap(name: str) -> str:
-            relative = PurePosixPath(name).relative_to(app_root)
+            relative = PurePosixPath(name).relative_to(bundle_root)
             return f"{install_prefix}/{relative}"
 
         desktop_sources = []
         icon_sources = []
         payload_members = []
         for member in members:
-            relative = str(PurePosixPath(member.name).relative_to(app_root)) if member.name != app_root else ""
+            relative = str(PurePosixPath(member.name).relative_to(bundle_root)) if member.name != bundle_root else ""
             if member.isfile() and DESKTOP_SOURCE_PATTERN.fullmatch(relative):
                 desktop_sources.append(member)
             icon_match = ICON_SOURCE_PATTERN.fullmatch(relative) if member.isfile() else None
@@ -361,23 +361,23 @@ def build_deb_from_tarball(
 
         desktop_member = desktop_sources[0]
         desktop_text = rewrite_desktop_entry(
-            _read_member(archive, desktop_member).decode("utf-8"),
+            read_member(archive, desktop_member).decode("utf-8"),
             CLI_NAME,
             ICON_NAME,
         )
 
         generated = [
-            _GeneratedFile(
+            GeneratedFile(
                 f"./usr/bin/{CLI_NAME}",
                 launcher_script(repository, package).encode("utf-8"),
                 0o755,
             ),
-            _GeneratedFile(
+            GeneratedFile(
                 f"./usr/share/applications/{DESKTOP_FILE_NAME}",
                 desktop_text.encode("utf-8"),
                 0o644,
             ),
-            _GeneratedFile(
+            GeneratedFile(
                 f"./usr/share/doc/{package}/copyright",
                 copyright_file(repository).encode("utf-8"),
                 0o644,
@@ -385,9 +385,9 @@ def build_deb_from_tarball(
         ]
         for size, member in icon_sources:
             generated.append(
-                _GeneratedFile(
+                GeneratedFile(
                     f"./usr/share/icons/hicolor/{size}/apps/{ICON_NAME}.png",
-                    _read_member(archive, member),
+                    read_member(archive, member),
                     0o644,
                 )
             )
@@ -417,17 +417,17 @@ def build_deb_from_tarball(
             ) as data_tar:
                 for name in sorted(directories):
                     data_tar.addfile(
-                        _tar_entry(name, mode=0o755, mtime=mtime, typ=tarfile.DIRTYPE)
+                        tar_entry(name, mode=0o755, mtime=mtime, typ=tarfile.DIRTYPE)
                     )
 
-                entries: list[tuple[str, tarfile.TarInfo | None, _GeneratedFile | None]] = [
+                entries: list[tuple[str, tarfile.TarInfo | None, GeneratedFile | None]] = [
                     (remap(member.name), member, None) for member in payload_members
                 ]
                 entries.extend((entry.name, None, entry) for entry in generated)
                 for name, member, generated_file in sorted(entries, key=lambda item: item[0]):
                     if member is not None and (member.issym() or member.islnk()):
                         typ = tarfile.SYMTYPE if member.issym() else tarfile.LNKTYPE
-                        info = _tar_entry(name, mode=0o777, mtime=member.mtime, typ=typ)
+                        info = tar_entry(name, mode=0o777, mtime=member.mtime, typ=typ)
                         if member.issym():
                             info.linkname = member.linkname
                         else:
@@ -436,9 +436,9 @@ def build_deb_from_tarball(
                         continue
 
                     if member is not None:
-                        info = _tar_entry(
+                        info = tar_entry(
                             name,
-                            mode=_normalized_file_mode(member.mode),
+                            mode=normalized_file_mode(member.mode),
                             mtime=member.mtime,
                         )
                         info.size = member.size
@@ -452,7 +452,7 @@ def build_deb_from_tarball(
                         size = member.size
                     else:
                         assert generated_file is not None
-                        info = _tar_entry(name, mode=generated_file.mode, mtime=mtime)
+                        info = tar_entry(name, mode=generated_file.mode, mtime=mtime)
                         info.size = len(generated_file.data)
                         data_tar.addfile(info, io.BytesIO(generated_file.data))
                         digest = hashlib.md5(generated_file.data)

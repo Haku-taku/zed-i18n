@@ -339,6 +339,30 @@ class CiReleaseTests(unittest.TestCase):
             },
         )
 
+    def test_classifies_arch_packaging_trees(self) -> None:
+        # The -pkgdir suffix precedes the generic .tar.gz rule, so a staging
+        # tree is never reported as a portable app bundle.
+        self.assertEqual(
+            classify_asset(Path("zed-i18n-ko-KR-linux-x86_64-pkgdir.tar.gz")),
+            {
+                "name": "zed-i18n-ko-KR-linux-x86_64-pkgdir.tar.gz",
+                "kind": "arch_package",
+                "locale": "ko-KR",
+                "platform": "linux",
+                "arch": "x86_64",
+            },
+        )
+        self.assertEqual(
+            classify_asset(Path("zed-i18n-linux-aarch64-pkgdir.tar.gz")),
+            {
+                "name": "zed-i18n-linux-aarch64-pkgdir.tar.gz",
+                "kind": "arch_package",
+                "locale": None,
+                "platform": "linux",
+                "arch": "aarch64",
+            },
+        )
+
     def test_classifies_universal_assets_without_locale(self) -> None:
         self.assertEqual(
             classify_asset(Path("zed-i18n-linux-x86_64.tar.gz")),
@@ -379,8 +403,10 @@ class CiReleaseTests(unittest.TestCase):
                 "Zed-i18n-windows-aarch64.zip",
                 "Zed-i18n-windows-x86_64.exe",
                 "Zed-i18n-windows-x86_64.zip",
+                "zed-i18n-linux-aarch64-pkgdir.tar.gz",
                 "zed-i18n-linux-aarch64.deb",
                 "zed-i18n-linux-aarch64.tar.gz",
+                "zed-i18n-linux-x86_64-pkgdir.tar.gz",
                 "zed-i18n-linux-x86_64.deb",
                 "zed-i18n-linux-x86_64.tar.gz",
             ],
@@ -422,8 +448,10 @@ class CiReleaseTests(unittest.TestCase):
                 "Zed-i18n-ja-JP-windows-aarch64.zip",
                 "Zed-i18n-ko-KR-windows-aarch64.exe",
                 "Zed-i18n-ko-KR-windows-aarch64.zip",
+                "zed-i18n-ja-JP-linux-x86_64-pkgdir.tar.gz",
                 "zed-i18n-ja-JP-linux-x86_64.deb",
                 "zed-i18n-ja-JP-linux-x86_64.tar.gz",
+                "zed-i18n-ko-KR-linux-x86_64-pkgdir.tar.gz",
                 "zed-i18n-ko-KR-linux-x86_64.deb",
                 "zed-i18n-ko-KR-linux-x86_64.tar.gz",
             ],
@@ -1776,6 +1804,20 @@ function download_git() {
 
         with self.assertRaisesRegex(ValueError, "download_and_unpack"):
             patch_macos_git_download_transient_retries(script)
+
+    def test_release_workflow_builds_arch_trees_before_metadata(self) -> None:
+        workflow = (Path.cwd() / ".github" / "workflows" / "i18n-release.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("ci_release build-arch", workflow)
+        self.assertIn("--dist-dir release-artifacts", workflow)
+        # The staged trees have to exist before the manifest and checksums are
+        # written, or they are published without an entry.
+        self.assertLess(
+            workflow.index("ci_release build-arch"),
+            workflow.index("ci_release metadata"),
+        )
 
 
 if __name__ == "__main__":

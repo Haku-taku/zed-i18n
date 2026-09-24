@@ -573,6 +573,45 @@ jobs:
           done
           echo "Validated ${#debs[@]} Debian packages with dpkg-deb"
 
+      # Staged on the bare runner rather than in the Linux builder container:
+      # nothing is compiled here, and touching docker/linux-builder/** would
+      # force a builder-image rebuild that the release would then wait on.
+      - name: Build Arch Linux packaging trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run python -m tools.zed_i18n.ci_release build-arch \
+            --dist-dir release-artifacts
+          shopt -s nullglob
+          trees=(release-artifacts/*-pkgdir.tar.gz)
+          if [ ${#trees[@]} -eq 0 ]; then
+            echo "No Arch staging trees were produced." >&2
+            exit 1
+          fi
+
+          digests=()
+          for tree in "${trees[@]}"; do
+            # Read the listing through process substitution rather than a pipe:
+            # grep -q exits on the first match, and as a pipeline stage under
+            # pipefail that SIGPIPEs tar and fails the step spuriously.
+            if ! grep -qx 'usr/bin/zeditor' < <(tar -tzf "$tree"); then
+              echo "Staged tree is missing usr/bin/zeditor: $tree" >&2
+              exit 1
+            fi
+            digests+=("$(sha256sum "$tree")")
+          done
+
+          printf '%s\n' "${digests[@]}"
+          {
+            echo "### Arch Linux staging trees"
+            echo
+            echo "Paste these into \`packaging/arch/PKGBUILD\`'s \`sha256sums\`."
+            echo
+            echo '```'
+            printf '%s\n' "${digests[@]}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Generate manifest and checksums
         env:
           INPUT_RELEASE_TAG: ${{ inputs.release_tag || '' }}
@@ -695,7 +734,11 @@ jobs:
           RELEASE_TAG="${INPUT_RELEASE_TAG:-$GITHUB_REF_NAME}"
           gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false
 
+      # Only the canonical repo carries the packaging mirrors, and only it has
+      # PACKAGING_REPOS_TOKEN. On a fork this dispatch would target a workflow
+      # that cannot authenticate, so skip it rather than fail the run.
       - name: Update packaging
+        if: github.repository == 'LI-NA/zed-i18n'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_RELEASE_TAG: ${{ inputs.release_tag || '' }}

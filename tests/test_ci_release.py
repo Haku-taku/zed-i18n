@@ -339,6 +339,20 @@ class CiReleaseTests(unittest.TestCase):
             },
         )
 
+    def test_classifies_the_rendered_pkgbuild(self) -> None:
+        # The PKGBUILD covers both architectures at once, so unlike every other
+        # Linux asset it has no arch to report and is not built per platform.
+        self.assertEqual(
+            classify_asset(Path("PKGBUILD")),
+            {
+                "name": "PKGBUILD",
+                "kind": "pkgbuild",
+                "locale": None,
+                "platform": "linux",
+                "arch": None,
+            },
+        )
+
     def test_classifies_arch_packaging_trees(self) -> None:
         # The -pkgdir suffix precedes the generic .tar.gz rule, so a staging
         # tree is never reported as a portable app bundle.
@@ -397,6 +411,7 @@ class CiReleaseTests(unittest.TestCase):
         self.assertEqual(
             expected_universal_asset_names(platforms),
             [
+                "PKGBUILD",
                 "Zed-i18n-macos-aarch64.dmg",
                 "Zed-i18n-macos-x86_64.dmg",
                 "Zed-i18n-windows-aarch64.exe",
@@ -410,6 +425,18 @@ class CiReleaseTests(unittest.TestCase):
                 "zed-i18n-linux-x86_64.deb",
                 "zed-i18n-linux-x86_64.tar.gz",
             ],
+        )
+
+    def test_expects_a_pkgbuild_only_when_both_linux_arches_are_built(self) -> None:
+        # A PKGBUILD pins one digest per arch, so a run that stages only one of
+        # them publishes no PKGBUILD -- and a run that publishes one must expect
+        # it, or the manifest gate rejects it as an unexpected asset.
+        self.assertIn("PKGBUILD", expected_universal_asset_names(select_platforms("linux")))
+        self.assertNotIn(
+            "PKGBUILD", expected_universal_asset_names(select_platforms("linux-x86_64"))
+        )
+        self.assertNotIn(
+            "PKGBUILD", expected_universal_asset_names(select_platforms("macos,windows"))
         )
 
     def test_generates_manifest_and_checksums(self) -> None:

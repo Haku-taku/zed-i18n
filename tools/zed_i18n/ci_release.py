@@ -19,7 +19,13 @@ import zipfile
 
 from .apply import apply_translations
 from .apply_universal import apply_universal
-from .arch import arch_asset_name, build_release_arch
+from .arch import (
+    PKGBUILD_ASSET_NAME,
+    SUPPORTED_ARCHES,
+    arch_asset_name,
+    build_release_arch,
+    build_release_pkgbuild,
+)
 from .config import load_project_config, zed_checkout_path
 from .deb import build_release_debs, deb_asset_name
 from .distribution import (
@@ -874,11 +880,19 @@ def expected_app_asset_names(
 
 
 def expected_universal_asset_names(platforms: Iterable[BuildPlatform]) -> list[str]:
-    return sorted(
+    platforms = list(platforms)
+    names = [
         name
         for platform in platforms
         for name in app_asset_names(None, platform.platform, platform.arch)
-    )
+    ]
+    # The PKGBUILD pins a digest per architecture and is not built per platform,
+    # so it only exists when both Linux trees do. A run scoped to one arch, or
+    # to macOS/Windows alone, publishes no PKGBUILD and must not expect one.
+    linux_arches = {platform.arch for platform in platforms if platform.platform == "linux"}
+    if linux_arches == set(SUPPORTED_ARCHES):
+        names.append(PKGBUILD_ASSET_NAME)
+    return sorted(names)
 
 
 WINDOWS_PORTABLE_ENTRIES = (
@@ -1271,6 +1285,15 @@ def build_universal(
 
 
 APP_PATTERNS = (
+    # Rendered from packaging/arch/PKGBUILD by the build-arch step. One file
+    # serves both architectures, so it carries no arch group -- classify_asset
+    # reports arch=None for it, and packaging.py ignores it (it selects the
+    # assets it mirrors by kind).
+    (
+        re.compile(r"^PKGBUILD$"),
+        "linux",
+        "pkgbuild",
+    ),
     # Universal assets: no locale segment, classified with locale=None.
     (
         re.compile(r"^zed-i18n-linux-(?P<arch>x86_64|aarch64)\.tar\.gz$"),
@@ -1357,7 +1380,8 @@ def classify_asset(path: Path) -> dict[str, object]:
                 "kind": kind,
                 "locale": match.groupdict().get("locale"),
                 "platform": platform,
-                "arch": match.group("arch"),
+                # None for assets that are not per-architecture, e.g. PKGBUILD.
+                "arch": match.groupdict().get("arch"),
             }
 
     raise ValueError(f"unrecognized release asset name: {name}")
@@ -1563,6 +1587,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     arch_parser = subparsers.add_parser("build-arch")
     arch_parser.add_argument("--dist-dir", required=True)
+    arch_parser.add_argument("--release-tag", required=True)
+    arch_parser.add_argument("--repository", required=True)
     arch_parser.add_argument("--max-workers", type=int)
 
     metadata_parser = subparsers.add_parser("metadata")
@@ -1658,14 +1684,22 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"Built {deb.name} ({deb.stat().st_size} bytes)")
             return 0
         if args.command == "build-arch":
-            arch_packages = build_release_arch(
-                ensure_inside_workspace(root, Path(args.dist_dir).resolve()),
-                max_workers=args.max_workers,
-            )
+            dist_dir = ensure_inside_workspace(root, Path(args.dist_dir).resolve())
+            arch_packages = build_release_arch(dist_dir, max_workers=args.max_workers)
             if not arch_packages:
-                print("No Linux release archives found; no Arch packages were built.")
+                print(
+                    "No Linux release archives found; neither Arch staging trees nor "
+                    "a PKGBUILD were built."
+                )
+                return 0
             for package in arch_packages:
                 print(f"Built {package.name} ({package.stat().st_size} bytes)")
+            pkgbuild = build_release_pkgbuild(
+                dist_dir,
+                release_tag=args.release_tag,
+                repository=args.repository,
+            )
+            print(f"Rendered {pkgbuild.name} for {args.release_tag} ({args.repository})")
             return 0
         if args.command == "metadata":
             expected_assets = None

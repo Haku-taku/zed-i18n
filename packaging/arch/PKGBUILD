@@ -62,10 +62,14 @@ _tag="v$pkgver-i18n.$_i18nrev"
 source_x86_64=("$url/releases/download/$_tag/zed-i18n-linux-x86_64-pkgdir.tar.gz")
 source_aarch64=("$url/releases/download/$_tag/zed-i18n-linux-aarch64-pkgdir.tar.gz")
 
-# TODO: replace both with the digests the release workflow prints into its
-# "Arch Linux staging trees" job summary (also in the release's SHA256SUMS.txt).
-# The zeros below are deliberate: they fail verification loudly, so a package
-# built before these are filled in cannot be mistaken for a verified one.
+# This file is a template. pkgver, _i18nrev, url and both sha256sums lines are
+# rewritten at release time by tools/zed_i18n/arch.py:render_pkgbuild(), and the
+# result is published next to the staging trees as a `PKGBUILD` release asset.
+# Take that copy -- not this one -- when building a release, or copy its five
+# rendered lines back here.
+#
+# The zeros are deliberate: they fail verification loudly, so the template
+# cannot be mistaken for a buildable PKGBUILD for the current release.
 sha256sums_x86_64=('0000000000000000000000000000000000000000000000000000000000000000')
 sha256sums_aarch64=('0000000000000000000000000000000000000000000000000000000000000000')
 

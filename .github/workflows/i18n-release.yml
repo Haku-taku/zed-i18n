@@ -577,11 +577,16 @@ jobs:
       # nothing is compiled here, and touching docker/linux-builder/** would
       # force a builder-image rebuild that the release would then wait on.
       - name: Build Arch Linux packaging trees
+        env:
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag || '' }}
         shell: bash
         run: |
           set -euo pipefail
+          RELEASE_TAG="${INPUT_RELEASE_TAG:-$GITHUB_REF_NAME}"
           uv run python -m tools.zed_i18n.ci_release build-arch \
-            --dist-dir release-artifacts
+            --dist-dir release-artifacts \
+            --release-tag "$RELEASE_TAG" \
+            --repository "$GITHUB_REPOSITORY"
           shopt -s nullglob
           trees=(release-artifacts/*-pkgdir.tar.gz)
           if [ ${#trees[@]} -eq 0 ]; then
@@ -602,11 +607,17 @@ jobs:
             digests+=("$(sha256sum "$tree")")
           done
 
+          # Re-hashed here rather than read back from the rendered PKGBUILD so
+          # that the digests printed below are an independent check on what
+          # render_pkgbuild() wrote into it.
           printf '%s\n' "${digests[@]}"
           {
             echo "### Arch Linux staging trees"
             echo
-            echo "Paste these into \`packaging/arch/PKGBUILD\`'s \`sha256sums\`."
+            echo "\`PKGBUILD\` is published alongside the trees with these digests"
+            echo "already rendered into its \`sha256sums\`, so it is the copy to"
+            echo "build from. The lines below are the same values, for checking"
+            echo "them against."
             echo
             echo '```'
             printf '%s\n' "${digests[@]}"

@@ -7,10 +7,16 @@ from pathlib import Path
 from tools.zed_i18n.arch import (
     DESKTOP_FILE_NAME,
     METAINFO_FILE_NAME,
+    PKGBUILD_ASSET_NAME,
+    PKGBUILD_TEMPLATE,
+    SUPPORTED_ARCHES,
     arch_asset_name,
     build_arch_from_tarball,
     build_release_arch,
+    build_release_pkgbuild,
     render_metainfo,
+    render_pkgbuild,
+    sha256_file,
 )
 
 
@@ -308,6 +314,157 @@ class ArchTests(unittest.TestCase):
             sorted(path.name for path in built),
             ["zed-i18n-linux-aarch64-pkgdir.tar.gz", "zed-i18n-linux-x86_64-pkgdir.tar.gz"],
         )
+
+
+class PkgbuildRenderTests(unittest.TestCase):
+    """The checked-in PKGBUILD is a template; the released one is rendered.
+
+    These run against the real ``packaging/arch/PKGBUILD`` rather than a
+    fixture, because the point is to catch that file and arch.py drifting apart.
+    """
+
+    DIGESTS = {
+        "x86_64": "1" * 64,
+        "aarch64": "2" * 64,
+    }
+
+    def render(self, template: str | None = None, **overrides: object) -> str:
+        arguments = {
+            "pkgver": "1.20.2",
+            "i18nrev": 3,
+            "repository": "Haku-taku/zed-i18n",
+            "digests": self.DIGESTS,
+            **overrides,
+        }
+        if template is None:
+            template = PKGBUILD_TEMPLATE.read_text(encoding="utf-8")
+        return render_pkgbuild(template, **arguments)  # type: ignore[arg-type]
+
+    def test_template_sources_exactly_the_assets_arch_py_publishes(self) -> None:
+        # `_tag` is assembled by the template from $pkgver and $_i18nrev, so the
+        # only thing that can silently desync the download URL from what
+        # build_release_arch() writes is the filename itself.
+        template = PKGBUILD_TEMPLATE.read_text(encoding="utf-8")
+        for arch in SUPPORTED_ARCHES:
+            self.assertIn(
+                f'"$url/releases/download/$_tag/{arch_asset_name(None, arch)}"',
+                template,
+            )
+
+    def test_renders_the_release_identity_and_digests(self) -> None:
+        rendered = self.render()
+        self.assertIn("pkgver=1.20.2\n", rendered)
+        self.assertIn("_i18nrev=3\n", rendered)
+        self.assertIn("url=https://github.com/Haku-taku/zed-i18n\n", rendered)
+        self.assertIn(f"sha256sums_x86_64=('{'1' * 64}')\n", rendered)
+        self.assertIn(f"sha256sums_aarch64=('{'2' * 64}')\n", rendered)
+
+    def test_replaces_the_placeholder_digests(self) -> None:
+        # The template's zero digests fail makepkg loudly; a render that left
+        # them in place would publish a PKGBUILD nothing can build.
+        template = PKGBUILD_TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn("0" * 64, template)
+        self.assertNotIn("0" * 64, self.render())
+
+    def test_leaves_every_release_independent_line_alone(self) -> None:
+        template = PKGBUILD_TEMPLATE.read_text(encoding="utf-8")
+        rendered = self.render(template)
+        replaced = {"pkgver", "_i18nrev", "url", "sha256sums_x86_64", "sha256sums_aarch64"}
+
+        def is_rendered(line: str) -> bool:
+            key = line.split("=", 1)[0]
+            return "=" in line and key in replaced
+
+        self.assertEqual(
+            [line for line in rendered.splitlines() if not is_rendered(line)],
+            [line for line in template.splitlines() if not is_rendered(line)],
+        )
+        # The install step and the arch-independent metadata must survive.
+        self.assertIn("package() {", rendered)
+        self.assertIn("provides=(zed)", rendered)
+        self.assertIn('cp -a --no-preserve=ownership "$srcdir/usr" "$pkgdir/"', rendered)
+
+    def test_is_a_fixed_point_applied_twice(self) -> None:
+        # Re-rendering an already-rendered file must change nothing, so a
+        # half-updated template cannot produce a PKGBUILD that depends on how
+        # many times it was rendered.
+        once = self.render()
+        self.assertEqual(self.render(once), once)
+
+    def test_rejects_a_template_that_lost_a_rendered_line(self) -> None:
+        template = "\n".join(
+            line
+            for line in PKGBUILD_TEMPLATE.read_text(encoding="utf-8").splitlines()
+            if not line.startswith("sha256sums_aarch64=")
+        )
+        with self.assertRaises(ValueError) as caught:
+            self.render(template)
+        self.assertIn("sha256sums_aarch64", str(caught.exception))
+
+    def test_rejects_a_digest_that_is_not_sha256(self) -> None:
+        with self.assertRaises(ValueError) as caught:
+            self.render(digests={"x86_64": "abc", "aarch64": "2" * 64})
+        self.assertIn("not a sha256 digest", str(caught.exception))
+
+    def test_rejects_a_missing_architecture(self) -> None:
+        with self.assertRaises(ValueError) as caught:
+            self.render(digests={"x86_64": "1" * 64})
+        self.assertIn("missing release digest for aarch64", str(caught.exception))
+
+
+class PkgbuildAssetTests(unittest.TestCase):
+    """build_release_pkgbuild() turns staged trees into a released PKGBUILD."""
+
+    def setUp(self) -> None:
+        self.temp_root = Path.cwd() / "tests" / ".tmp" / self._testMethodName
+        shutil.rmtree(self.temp_root, ignore_errors=True)
+        self.temp_root.mkdir(parents=True)
+        self.dist_dir = self.temp_root / "dist"
+        self.dist_dir.mkdir()
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.temp_root, ignore_errors=True)
+
+    def stage(self, arch: str, payload: bytes = b"tree") -> Path:
+        path = self.dist_dir / arch_asset_name(None, arch)
+        path.write_bytes(payload)
+        return path
+
+    def test_pins_the_digest_of_each_staged_tree(self) -> None:
+        trees = {arch: self.stage(arch, f"tree-{arch}".encode()) for arch in SUPPORTED_ARCHES}
+
+        output = build_release_pkgbuild(
+            self.dist_dir,
+            release_tag="v1.20.2-i18n.3",
+            repository="Haku-taku/zed-i18n",
+        )
+
+        self.assertEqual(output.name, PKGBUILD_ASSET_NAME)
+        rendered = output.read_text(encoding="utf-8")
+        for arch, tree in trees.items():
+            self.assertIn(f"sha256sums_{arch}=('{sha256_file(tree)}')", rendered)
+        self.assertIn("pkgver=1.20.2\n", rendered)
+        self.assertIn("_i18nrev=3\n", rendered)
+        self.assertIn("url=https://github.com/Haku-taku/zed-i18n\n", rendered)
+
+    def test_requires_a_tree_for_every_architecture(self) -> None:
+        self.stage("x86_64")
+        with self.assertRaises(ValueError) as caught:
+            build_release_pkgbuild(
+                self.dist_dir,
+                release_tag="v1.20.2-i18n.3",
+                repository="Haku-taku/zed-i18n",
+            )
+        self.assertIn("zed-i18n-linux-aarch64-pkgdir.tar.gz", str(caught.exception))
+
+    def test_rejects_a_tag_it_cannot_read_a_revision_from(self) -> None:
+        for arch in SUPPORTED_ARCHES:
+            self.stage(arch)
+        with self.assertRaises(ValueError) as caught:
+            build_release_pkgbuild(
+                self.dist_dir, release_tag="v1.20.2", repository="Haku-taku/zed-i18n"
+            )
+        self.assertIn("unsupported release tag", str(caught.exception))
 
 
 if __name__ == "__main__":

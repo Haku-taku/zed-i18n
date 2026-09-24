@@ -17,14 +17,23 @@ Shell completions and the AppStream metainfo are absent from the bundle and are
 generated here, so the output is a complete staging tree. It is consumed by
 ``packaging/arch/PKGBUILD``, whose ``package()`` only copies ``usr/`` into
 ``$pkgdir``.
+
+That PKGBUILD is checked in as a template: the parts that are only knowable at
+release time -- the tag, the repository publishing the assets, and the digests
+of the two staging trees -- are rendered by :func:`render_pkgbuild` into a
+``PKGBUILD`` that ships alongside the trees as a release asset. The checked-in
+copy therefore describes the last release it was rendered for, and the released
+copy is the one that is guaranteed to match the archives beside it.
 """
 
 from __future__ import annotations
 
 import gzip
+import hashlib
 import io
 import os
 import platform
+import re
 import shutil
 import subprocess
 import tarfile
@@ -45,6 +54,7 @@ from .deb import (
     tar_entry,
 )
 from .linux_abi import validate_archive_members
+from .packaging import RELEASE_TAG_PATTERN
 
 
 # These mirror the official Arch package
@@ -88,6 +98,28 @@ SUPPORTED_ARCHES = ("x86_64", "aarch64")
 
 METAINFO_TEMPLATE = Path(__file__).with_name("arch_overlay") / "zed.metainfo.xml.in"
 
+# One PKGBUILD covers both architectures, so unlike every other asset here it
+# carries no arch in its name and is not built per platform. It is rendered
+# from the checked-in template rather than staged from a release archive.
+PKGBUILD_ASSET_NAME = "PKGBUILD"
+PKGBUILD_TEMPLATE = (
+    Path(__file__).resolve().parents[2] / "packaging" / "arch" / "PKGBUILD"
+)
+
+# The lines render_pkgbuild() rewrites. Everything else in the template is
+# release-independent and is copied through untouched. `_tag` is deliberately
+# absent: it is derived from pkgver and _i18nrev by the template itself.
+PKGBUILD_RENDERED_FIELDS = (
+    "pkgver",
+    "_i18nrev",
+    "url",
+    "sha256sums_x86_64",
+    "sha256sums_aarch64",
+)
+
+_ASSIGNMENT_PATTERN = re.compile(r"^(?P<key>[A-Za-z_][A-Za-z0-9_]*)=")
+_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+
 _HOST_ARCHES = {
     "x86_64": "x86_64",
     "amd64": "x86_64",
@@ -119,6 +151,106 @@ def render_metainfo(template_path: Path = METAINFO_TEMPLATE) -> str:
         text = text.replace(variable, value)
     lines = [line for line in text.splitlines() if "@release_info@" not in line]
     return "\n".join(lines) + "\n"
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def render_pkgbuild(
+    template: str,
+    *,
+    pkgver: str,
+    i18nrev: int,
+    repository: str,
+    digests: dict[str, str],
+) -> str:
+    """Fill one release's identity and digests into the PKGBUILD template.
+
+    Only whole ``key=value`` lines are replaced, so the template keeps owning
+    everything release-independent -- the dependency list, ``provides``/
+    ``conflicts``, ``package()`` and the ``_tag`` derived from the two values
+    written here. A key the template no longer carries is an error rather than
+    a silent omission: it would otherwise ship a PKGBUILD whose ``sha256sums``
+    makepkg still reads from the stale checked-in line.
+    """
+    missing_arches = sorted(set(digests) - set(SUPPORTED_ARCHES))
+    if missing_arches:
+        raise ValueError(f"unsupported architectures in PKGBUILD digests: {missing_arches}")
+
+    replacements = {
+        "pkgver": pkgver,
+        "_i18nrev": str(i18nrev),
+        "url": f"https://github.com/{repository}",
+    }
+    for arch in SUPPORTED_ARCHES:
+        digest = digests.get(arch)
+        if digest is None:
+            raise ValueError(f"missing release digest for {arch}")
+        if not _SHA256_PATTERN.match(digest):
+            raise ValueError(f"not a sha256 digest for {arch}: {digest!r}")
+        replacements[f"sha256sums_{arch}"] = f"('{digest}')"
+
+    rendered: list[str] = []
+    replaced: set[str] = set()
+    for line in template.splitlines():
+        assignment = _ASSIGNMENT_PATTERN.match(line)
+        key = assignment.group("key") if assignment else None
+        if key in replacements:
+            rendered.append(f"{key}={replacements[key]}")
+            replaced.add(key)
+        else:
+            rendered.append(line)
+
+    missing_fields = [field for field in PKGBUILD_RENDERED_FIELDS if field not in replaced]
+    if missing_fields:
+        raise ValueError(f"PKGBUILD template is missing required lines: {missing_fields}")
+    return "\n".join(rendered) + "\n"
+
+
+def build_release_pkgbuild(
+    dist_dir: Path,
+    *,
+    release_tag: str,
+    repository: str,
+    template_path: Path = PKGBUILD_TEMPLATE,
+) -> Path:
+    """Render the release's PKGBUILD into ``dist_dir`` so it ships as an asset.
+
+    Both architectures have to be staged first: the file pins a digest per arch,
+    so a run that built only one would publish a PKGBUILD that cannot verify the
+    other.
+    """
+    match = RELEASE_TAG_PATTERN.match(release_tag)
+    if not match:
+        raise ValueError(f"unsupported release tag: {release_tag}")
+
+    digests: dict[str, str] = {}
+    for arch in SUPPORTED_ARCHES:
+        tarball = dist_dir / arch_asset_name(None, arch)
+        if not tarball.is_file():
+            raise ValueError(
+                "cannot render the PKGBUILD without a staging tree for every "
+                f"architecture; missing {tarball.name}"
+            )
+        digests[arch] = sha256_file(tarball)
+
+    output = dist_dir / PKGBUILD_ASSET_NAME
+    output.write_text(
+        render_pkgbuild(
+            template_path.read_text(encoding="utf-8"),
+            pkgver=match.group("base"),
+            i18nrev=int(match.group("revision")),
+            repository=repository,
+            digests=digests,
+        ),
+        encoding="utf-8",
+    )
+    return output
 
 
 def extract_bundle(tarball_path: Path, destination: Path) -> str:

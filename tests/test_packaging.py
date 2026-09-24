@@ -119,7 +119,7 @@ def universal_release_asset(
     name: str,
     kind: str,
     platform: str,
-    arch: str,
+    arch: str | None,
     sha256: str,
     locale: str | None = None,
 ) -> dict[str, object]:
@@ -172,6 +172,10 @@ def sample_universal_manifest(
             "x86_64",
             "arch-x64",
         ),
+        # One PKGBUILD serves both architectures, so it carries no arch at all.
+        # Ignored like the trees above -- and it must not trip the same
+        # "unexpected asset" gate that would reject an unknown kind.
+        universal_release_asset("PKGBUILD", "pkgbuild", "linux", None, "pkgbuild-sha"),
     ]
     for locale in alias_locales:
         for app in universal_apps:

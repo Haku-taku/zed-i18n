@@ -103,3 +103,27 @@ jobs:
     steps:
       - name: Never
         run: echo "should not run"
+
+  # Mirrors the real shape: package needs the skipped macOS/Windows jobs but
+  # uses always(), so it succeeds; publish then needs only package.
+  transitive-mid:
+    name: Transitive middle (like package)
+    needs:
+      - report
+      - skipped-dep
+    if: ${{ always() && needs.report.result == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "TRANSITIVE MID RAN"
+
+  transitive-leaf:
+    name: Transitive leaf (like publish)
+    needs:
+      - report
+      - transitive-mid
+    if: startsWith(github.ref, 'refs/tags/') || inputs.upload_to_release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm
+        run: echo "TRANSITIVE LEAF RAN"

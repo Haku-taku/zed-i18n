@@ -119,6 +119,12 @@ STRUCT_FIELD_RULES: dict[tuple[str, str], tuple[str, str]] = {
         "FastModeConfirmation.message",
     ),
     ("SkillLoadError", "message"): ("skill_load_error", "SkillLoadError.message"),
+    ("LanguageSuggestion", "title"): ("notification_title", "LanguageSuggestion.title"),
+    ("LanguageSuggestion", "description"): ("notification", "LanguageSuggestion.description"),
+    ("LanguageSuggestion", "install_message"): (
+        "notification_message",
+        "LanguageSuggestion.install_message",
+    ),
 }
 
 UI_RETURN_METHODS: dict[str, tuple[str, str]] = {
@@ -517,10 +523,12 @@ LANGUAGE_MODEL_PROVIDER_MODEL_ERROR_SOURCES = {
 
 LANGUAGE_MODEL_PROVIDER_INLINE_TITLE_SOURCES = {
     "Configure ChatGPT",
+    "Configure SuperGrok",
 }
 
 LANGUAGE_MODEL_PROVIDER_INLINE_DESCRIPTION_SOURCES = {
     "Sign in with your ChatGPT Plus or Pro subscription to use OpenAI models in Zed's agent.",
+    "Sign in with your SuperGrok subscription to use Grok models in Zed's agent.",
     "Sign in to have access to Zed's complete agentic experience with hosted models.",
     "You have access to Zed's hosted models through your Pro subscription.",
     "Your Pro trial includes $5 of GPT Luna and unlimited edit predictions for 14 days from trial start.",
@@ -552,6 +560,52 @@ BEDROCK_MANTLE_USER_ERROR_SOURCES = {
         "{display_name} is not available in {region} because Bedrock Mantle isn't offered "
         "there. Try switching to one of the following regions: {supported}."
     ),
+}
+
+X_AI_SUBSCRIBED_USER_ERROR_SOURCES = {
+    (
+        "Login succeeded, but this Grok account cannot use the API (HTTP 403). Some plans "
+        "do not include this access. You can also use the separate xAI provider with an "
+        "API key from console.x.ai."
+    ),
+}
+
+AGENT_TOOL_CALL_ICON_TOOLTIP_FORMAT_SOURCES = {
+    "Interrupted Edit\nTool: {name}",
+    "Tool: {name}",
+}
+
+AGENT_TOOL_CALL_ICON_TOOLTIP_SOURCES = {
+    "Interrupted Edit",
+}
+
+SUBSCRIPTION_AUTH_ERROR_PATHS = {
+    "crates/openai_subscribed/src/openai_subscribed.rs",
+    "crates/x_ai_subscribed/src/x_ai_subscribed.rs",
+}
+
+SUBSCRIPTION_AUTH_ERROR_SOURCES = {
+    "Failed to save credentials. Please try again.",
+    "Sign-in failed. Please try again.",
+    "Your session has expired. Please sign in again.",
+    "Your SuperGrok session has expired. Sign in again.",
+}
+
+ACP_THREAD_UNSUPPORTED_IMAGE_SOURCES = {
+    "Image content could not be displayed.",
+}
+
+ACP_THREAD_UNSUPPORTED_CONTENT_SOURCES = {
+    "Audio content is not supported.",
+    "This content is not supported.",
+}
+
+ACP_THREAD_MISSING_TOOL_CALL_SOURCES = {
+    "Tool call not found",
+}
+
+ACP_THREAD_TOOL_CALL_FALLBACK_SOURCES = {
+    "Tool call",
 }
 
 PICKER_DELEGATE_PLACEHOLDER_SOURCES = {
@@ -2171,6 +2225,70 @@ def _extract_exact_line_literal_occurrences(
                 {"Loading…"},
             )
         )
+    if relative_path == "crates/agent_ui/src/conversation_view/thread_view.rs":
+        rules.append(
+            (
+                re.compile(r'\bformat!\(\s*("(?:\\.|[^"\\])*")\s*\)\.into\(\)'),
+                "tooltip",
+                "tool_call_icon_tooltip",
+                AGENT_TOOL_CALL_ICON_TOOLTIP_FORMAT_SOURCES,
+            )
+        )
+        rules.append(
+            (
+                re.compile(r'\bSome\(\s*("(?:\\.|[^"\\])*")\.into\(\)\s*\)'),
+                "tooltip",
+                "tool_call_icon_tooltip",
+                AGENT_TOOL_CALL_ICON_TOOLTIP_SOURCES,
+            )
+        )
+    if relative_path in SUBSCRIPTION_AUTH_ERROR_PATHS:
+        # Stored in `last_auth_error` and rendered by the provider
+        # configuration view as a `Label`.
+        rules.append(
+            (
+                re.compile(r'("(?:\\.|[^"\\])*")\.into\(\)'),
+                "provider_credential_error",
+                "SubscriptionState.last_auth_error",
+                SUBSCRIPTION_AUTH_ERROR_SOURCES,
+            )
+        )
+    if relative_path == "crates/acp_thread/src/acp_thread.rs":
+        # The file has no allowlist-literal rule on purpose: its inline test
+        # module repeats these strings in assertions. The line shapes below
+        # only match the production sites.
+        rules.append(
+            (
+                re.compile(r'("(?:\\.|[^"\\])*")\.into\(\)'),
+                "thread_error_message",
+                "ContentBlock.unsupported",
+                ACP_THREAD_UNSUPPORTED_IMAGE_SOURCES,
+            )
+        )
+        rules.append(
+            (
+                re.compile(r'^\s*("(?:\\.|[^"\\])*")\s*$'),
+                "thread_error_message",
+                "ContentBlock.unsupported",
+                ACP_THREAD_UNSUPPORTED_CONTENT_SOURCES,
+            )
+        )
+        rules.append(
+            (
+                re.compile(r'("(?:\\.|[^"\\])*")\.into\(\)'),
+                "agent_tool_title",
+                "AcpThread.missing_tool_call",
+                ACP_THREAD_MISSING_TOOL_CALL_SOURCES,
+            )
+        )
+        rules.append(
+            (
+                re.compile(r'\|\|\s*("(?:\\.|[^"\\])*")\.into\(\)'),
+                "agent_tool_title",
+                "ToolCall.label_text",
+                ACP_THREAD_TOOL_CALL_FALLBACK_SOURCES,
+            )
+        )
     if _is_git_graph_path(relative_path):
         rules.append(
             (
@@ -2594,6 +2712,14 @@ def _allowed_literal_rules_for_path(
                 BEDROCK_MANTLE_USER_ERROR_SOURCES,
                 "provider_model_error",
                 "BedrockMantle.user_error",
+            )
+        )
+    if relative_path == "crates/x_ai_subscribed/src/x_ai_subscribed.rs":
+        rules.append(
+            (
+                X_AI_SUBSCRIBED_USER_ERROR_SOURCES,
+                "provider_model_error",
+                "SuperGrok.inference_forbidden",
             )
         )
     if _is_search_path(relative_path):
@@ -4954,7 +5080,7 @@ EDITOR_GUTTER_TOOLTIP_LINE_PATTERNS: tuple[LinePattern, ...] = (
     LinePattern(
         re.compile(
             r'\bformat!\(\s*('
-            r'"\{modifier_as_text\}-click to add a \{other\}'
+            r'"\{modifier_as_text\}-click to add a \{secondary\}'
             r'\\n\{RIGHT_CLICK_HINT\}"'
             r')\s*\)'
         ),
@@ -5212,7 +5338,7 @@ LANGUAGE_MODEL_PROVIDER_LINE_PATTERNS: tuple[LinePattern, ...] = (
     ),
     LinePattern(
         re.compile(
-            r'\bformat!\(\s*("(?:API key configured for \{\}|Signed in as \{e\}|API key set in \{API_KEY_ENV_VAR_NAME\} environment variable\.?|Using AWS profile: \{profile_name\}|Using AWS SSO profile: \{profile_name\}|Using IAM credentials from \{\} and \{\} environment variables|Using Bedrock API Key from \{\} environment variable)")'
+            r'\bformat!\(\s*("(?:API key configured for \{\}|Signed in as \{(?:e|email)\}|API key set in \{API_KEY_ENV_VAR_NAME\} environment variable\.?|Using AWS profile: \{profile_name\}|Using AWS SSO profile: \{profile_name\}|Using IAM credentials from \{\} and \{\} environment variables|Using Bedrock API Key from \{\} environment variable)")'
         ),
         "ConfiguredApiCard::new",
         "configured_api_card_label",

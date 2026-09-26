@@ -35,6 +35,10 @@ PATCH_TARGETS = (
     "crates/keymap_editor/src/keymap_editor.rs",
     "crates/language_models/Cargo.toml",
     "crates/language_models/src/provider/openai_subscribed.rs",
+    "crates/language_models/src/provider/x_ai_subscribed.rs",
+    "crates/x_ai_subscribed/Cargo.toml",
+    "crates/x_ai_subscribed/src/x_ai_subscribed.rs",
+    "crates/extensions_ui/src/extension_suggest.rs",
     "crates/language_model/Cargo.toml",
     "crates/language_model/src/registry.rs",
     "crates/language_selector/Cargo.toml",
@@ -256,6 +260,24 @@ class RuntimeOverlayPatchTests(unittest.TestCase):
             '#[error("{}", localization::localized_str!',
             self._read("crates/language_model/src/registry.rs"),
         )
+
+        super_grok = self._read("crates/language_models/src/provider/x_ai_subscribed.rs")
+        self.assertNotIn("const SUBSCRIPTION_DESCRIPTION", super_grok)
+        self.assertIn("Label::new(subscription_description())", super_grok)
+        self.assertIn("InlineDescription::Text(subscription_description().into())", super_grok)
+        self.assertIn(
+            "message: localization::translate_static(INFERENCE_FORBIDDEN_MESSAGE).to_string(),",
+            self._read("crates/x_ai_subscribed/src/x_ai_subscribed.rs"),
+        )
+        self.assertIn(
+            "localization.workspace = true",
+            self._read("crates/x_ai_subscribed/Cargo.toml"),
+        )
+        extension_suggest = self._read("crates/extensions_ui/src/extension_suggest.rs")
+        for field in ("description", "title", "install_message"):
+            self.assertIn(
+                f"localization::translate_static(suggestion.{field})", extension_suggest
+            )
 
     def test_fails_closed_when_an_upstream_anchor_drifts(self) -> None:
         path = self.zed_root / "crates/zed/src/main.rs"

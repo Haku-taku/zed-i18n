@@ -4476,6 +4476,7 @@ class ExtractTests(unittest.TestCase):
                 '        .map(|e| format!("Signed in as {e}"))',
                 '        .unwrap_or_else(|| "Signed in".to_string());',
                 '    ConfiguredApiCard::new("openai-subscribed-sign-out", SharedString::from(label));',
+                '    let super_grok = state.email().map(|email| format!("Signed in as {email}"));',
                 '    let auth = "Using IAM credentials".into();',
                 '    let auth = format!("Using Bedrock API Key from {} environment variable", key);',
                 '    section_header("Static Credentials".into());',
@@ -4498,6 +4499,7 @@ class ExtractTests(unittest.TestCase):
                 "API key configured for {}",
                 "Authorized",
                 "Signed in as {e}",
+                "Signed in as {email}",
                 "Signed in",
                 "Using IAM credentials",
                 "Using Bedrock API Key from {} environment variable",
@@ -4529,6 +4531,11 @@ class ExtractTests(unittest.TestCase):
                 "fn inline_title(&self, cx: &App) -> Option<SharedString> {",
                 '    Some("Configure ChatGPT".into())',
                 "}",
+                "const SUPER_GROK_DESCRIPTION: &str =",
+                '    "Sign in with your SuperGrok subscription to use Grok models in Zed\'s agent.";',
+                "fn super_grok_title(&self) -> Option<SharedString> {",
+                '    Some("Configure SuperGrok".into())',
+                "}",
                 "fn zed_ai_description() -> &'static str {",
                 '    "You have access to Zed\'s hosted models through your Pro subscription."',
                 "}",
@@ -4554,6 +4561,8 @@ class ExtractTests(unittest.TestCase):
                 "To use OpenCode models in Zed, you need an API key.",
                 "Requires an active GitHub Copilot subscription.",
                 "Configure ChatGPT",
+                "Sign in with your SuperGrok subscription to use Grok models in Zed's agent.",
+                "Configure SuperGrok",
                 "You have access to Zed's hosted models through your Pro subscription.",
                 "Your Pro trial includes $5 of GPT Luna and unlimited edit predictions for 14 days from trial start.",
                 "Start a free trial with $5 of GPT Luna and unlimited edit predictions for 14 days from trial start.",
@@ -4564,6 +4573,200 @@ class ExtractTests(unittest.TestCase):
             "inline_description",
         )
         self.assertEqual(by_source["Configure ChatGPT"].kind, "inline_title")
+        self.assertEqual(by_source["Configure SuperGrok"].kind, "inline_title")
+
+    def test_extracts_super_grok_inference_forbidden_message(self) -> None:
+        source = "\n".join(
+            [
+                'const CALLBACK_PATH: &str = "/callback";',
+                'const INFERENCE_FORBIDDEN_MESSAGE: &str = "Login succeeded, but this Grok account cannot use the API \\',
+                "    (HTTP 403). Some plans do not include this access. You can also use the separate xAI provider \\",
+                '    with an API key from console.x.ai.";',
+            ]
+        )
+        message = (
+            "Login succeeded, but this Grok account cannot use the API (HTTP 403). Some plans "
+            "do not include this access. You can also use the separate xAI provider with an "
+            "API key from console.x.ai."
+        )
+
+        occurrences = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/x_ai_subscribed/src/x_ai_subscribed.rs",
+        )
+        other_crate = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/x_ai/src/x_ai.rs",
+        )
+
+        self.assertEqual(
+            [(occurrence.source, occurrence.kind, occurrence.call) for occurrence in occurrences],
+            [(message, "provider_model_error", "SuperGrok.inference_forbidden")],
+        )
+        self.assertEqual(other_crate, [])
+
+    def test_extracts_agent_tool_call_icon_tooltips(self) -> None:
+        source = "\n".join(
+            [
+                "fn render_interrupted(cx: &mut App) -> impl IntoElement {",
+                '    div().tooltip(Tooltip::text("Interrupted Edit"))',
+                "}",
+                "fn tool_call_icon_tooltip(",
+                "    tool_name: Option<&SharedString>,",
+                "    interrupted_edit: bool,",
+                ") -> Option<SharedString> {",
+                "    match (tool_name, interrupted_edit) {",
+                '        (Some(name), true) => Some(format!("Interrupted Edit\\nTool: {name}").into()),',
+                '        (Some(name), false) => Some(format!("Tool: {name}").into()),',
+                '        (None, true) => Some("Interrupted Edit".into()),',
+                "        (None, false) => None,",
+                "    }",
+                "}",
+                'fn other_id() -> Option<SharedString> { Some("tool-call-icon".into()) }',
+            ]
+        )
+
+        occurrences = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/agent_ui/src/conversation_view/thread_view.rs",
+        )
+
+        self.assertEqual(
+            sorted(
+                (occurrence.source, occurrence.line, occurrence.kind, occurrence.call)
+                for occurrence in occurrences
+            ),
+            [
+                ("Interrupted Edit", 2, "tooltip", "Tooltip::text"),
+                ("Interrupted Edit", 11, "tooltip", "tool_call_icon_tooltip"),
+                ("Interrupted Edit\nTool: {name}", 9, "tooltip", "tool_call_icon_tooltip"),
+                ("Tool: {name}", 10, "tooltip", "tool_call_icon_tooltip"),
+            ],
+        )
+
+    def test_extracts_subscription_provider_auth_errors(self) -> None:
+        source = "\n".join(
+            [
+                "state.last_auth_error =",
+                '    Some("Failed to save credentials. Please try again.".into());',
+                'state.last_auth_error = Some("Sign-in failed. Please try again.".into());',
+                "s.last_auth_error = Some(",
+                '    "Your SuperGrok session has expired. Sign in again.".into(),',
+                ");",
+                'let provider = "SuperGrok".into();',
+            ]
+        )
+
+        for relative_path in (
+            "crates/openai_subscribed/src/openai_subscribed.rs",
+            "crates/x_ai_subscribed/src/x_ai_subscribed.rs",
+        ):
+            occurrences = extract_ui_strings_from_source(source, relative_path=relative_path)
+            self.assertEqual(
+                [
+                    (occurrence.source, occurrence.line, occurrence.kind, occurrence.call)
+                    for occurrence in occurrences
+                ],
+                [
+                    (
+                        "Failed to save credentials. Please try again.",
+                        2,
+                        "provider_credential_error",
+                        "SubscriptionState.last_auth_error",
+                    ),
+                    (
+                        "Sign-in failed. Please try again.",
+                        3,
+                        "provider_credential_error",
+                        "SubscriptionState.last_auth_error",
+                    ),
+                    (
+                        "Your SuperGrok session has expired. Sign in again.",
+                        5,
+                        "provider_credential_error",
+                        "SubscriptionState.last_auth_error",
+                    ),
+                ],
+            )
+        self.assertEqual(
+            extract_ui_strings_from_source(source, relative_path="crates/x_ai/src/x_ai.rs"),
+            [],
+        )
+
+    def test_extracts_acp_thread_fallback_messages_but_not_test_assertions(self) -> None:
+        source = "\n".join(
+            [
+                "let title = tool_name",
+                '    .unwrap_or_else(|| "Tool call".into());',
+                "markdown: Self::create_markdown(",
+                '    "Image content could not be displayed.".into(),',
+                ");",
+                "let description = if is_audio {",
+                '    "Audio content is not supported."',
+                "} else {",
+                '    "This content is not supported."',
+                "};",
+                'label: cx.new(|cx| Markdown::new("Tool call not found".into(), None, None, cx)),',
+                'title: Some("Tool call not found".into()),',
+                "mod tests {",
+                '    assert!(text.contains("Audio content is not supported."));',
+                '    assert!(markdown_text.contains("Tool call not found"));',
+                '    (acp::ToolCall::new("tool", ""), "Tool call", false),',
+                "}",
+            ]
+        )
+
+        occurrences = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/acp_thread/src/acp_thread.rs",
+        )
+
+        self.assertEqual(
+            sorted(
+                (occurrence.source, occurrence.line, occurrence.kind, occurrence.call)
+                for occurrence in occurrences
+            ),
+            [
+                ("Audio content is not supported.", 7, "thread_error_message", "ContentBlock.unsupported"),
+                ("Image content could not be displayed.", 4, "thread_error_message", "ContentBlock.unsupported"),
+                ("This content is not supported.", 9, "thread_error_message", "ContentBlock.unsupported"),
+                ("Tool call", 2, "agent_tool_title", "ToolCall.label_text"),
+                ("Tool call not found", 11, "agent_tool_title", "AcpThread.missing_tool_call"),
+                ("Tool call not found", 12, "agent_tool_title", "AcpThread.missing_tool_call"),
+            ],
+        )
+
+    def test_extracts_language_suggestion_notification_fields(self) -> None:
+        source = "\n".join(
+            [
+                "const SUGGESTIONS_BY_LANGUAGE: &[LanguageSuggestion] = &[LanguageSuggestion {",
+                '    extension_id: "emmet",',
+                '    languages: &["HTML", "Vue.js"],',
+                '    title: "Emmet is available for this file",',
+                '    description: "Emmet expands abbreviations such as `ul>li*3` into HTML and `m10` into CSS.",',
+                '    docs_url: "https://zed.dev/docs/languages/emmet",',
+                '    install_message: "Install Emmet",',
+                "}];",
+            ]
+        )
+
+        occurrences = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/extensions_ui/src/extension_suggest.rs",
+        )
+
+        self.assertEqual(
+            sorted((occurrence.source, occurrence.kind, occurrence.call) for occurrence in occurrences),
+            [
+                (
+                    "Emmet expands abbreviations such as `ul>li*3` into HTML and `m10` into CSS.",
+                    "notification",
+                    "LanguageSuggestion.description",
+                ),
+                ("Emmet is available for this file", "notification_title", "LanguageSuggestion.title"),
+                ("Install Emmet", "notification_message", "LanguageSuggestion.install_message"),
+            ],
+        )
 
     def test_extracts_cloud_provider_inline_subscription_titles(self) -> None:
         source = "\n".join(
@@ -6036,14 +6239,14 @@ class ExtractTests(unittest.TestCase):
                 "    }",
                 "}",
                 "impl GutterButtonTooltip {",
-                "    fn meta_text(&self, intent: GutterButtonIntent) -> String {",
+                "    fn meta_text(&self) -> String {",
                 '        const RIGHT_CLICK_HINT: &str = "right-click for more options";',
-                "        let other = match intent {",
-                '            GutterButtonIntent::SetBookmark => "breakpoint",',
-                '            GutterButtonIntent::SetBreakpoint => "bookmark",',
+                "        let secondary = match self.secondary {",
+                '            GutterButtonIntent::SetBookmark => "bookmark",',
+                '            GutterButtonIntent::SetBreakpoint => "breakpoint",',
                 "        };",
                 '        let unrelated = "bookmark";',
-                '        format!("{modifier_as_text}-click to add a {other}\\n{RIGHT_CLICK_HINT}")',
+                '        format!("{modifier_as_text}-click to add a {secondary}\\n{RIGHT_CLICK_HINT}")',
                 "    }",
                 "}",
             ]
@@ -6061,7 +6264,7 @@ class ExtractTests(unittest.TestCase):
             ),
             "breakpoint": ("GutterButtonTooltip.meta_text", "tooltip_meta"),
             "bookmark": ("GutterButtonTooltip.meta_text", "tooltip_meta"),
-            "{modifier_as_text}-click to add a {other}\n{RIGHT_CLICK_HINT}": (
+            "{modifier_as_text}-click to add a {secondary}\n{RIGHT_CLICK_HINT}": (
                 "GutterButtonTooltip.meta_text",
                 "tooltip_meta",
             ),

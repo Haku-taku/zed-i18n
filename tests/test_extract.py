@@ -1351,6 +1351,84 @@ class ExtractTests(unittest.TestCase):
             "agent_tool_error",
         )
 
+    def test_extracts_subagent_errors_with_format_tokens_and_continuations(self) -> None:
+        source = r'''
+fn send() {
+    anyhow!("Model {model_id} is unavailable. Call list_agents_and_models to inspect available models.");
+    anyhow!("The agent is nearing the end of its context window and has been \
+             stopped. You can prompt the thread again to have the agent wrap up \
+             or hand off its work.");
+    anyhow!("User canceled");
+    anyhow!("The agent reached the maximum number of tokens.");
+    anyhow!("The agent reached the maximum number of allowed requests between user turns. Try prompting again.");
+    anyhow!("The agent refused to process that prompt. Try again.");
+    response.context("No response from subagent");
+    anyhow!("No response from the agent. You can try messaging again.");
+    anyhow!("{error:#}\n\nPartial subagent output (last 3 messages, up to 4096 characters each):\n\n{partial_output}");
+    log::warn!("internal subagent trace");
+}
+'''
+        expected = {
+            "Model {model_id} is unavailable. Call list_agents_and_models to inspect available models.",
+            "The agent is nearing the end of its context window and has been stopped. You can prompt the thread again to have the agent wrap up or hand off its work.",
+            "User canceled",
+            "The agent reached the maximum number of tokens.",
+            "The agent reached the maximum number of allowed requests between user turns. Try prompting again.",
+            "The agent refused to process that prompt. Try again.",
+            "No response from subagent",
+            "No response from the agent. You can try messaging again.",
+            "{error:#}\n\nPartial subagent output (last 3 messages, up to 4096 characters each):\n\n{partial_output}",
+        }
+        occurrences = extract_ui_strings_from_source(
+            source, relative_path="crates/agent/src/agent.rs",
+        )
+        self.assertEqual({item.source for item in occurrences}, expected)
+        self.assertEqual({item.kind for item in occurrences}, {"agent_tool_error"})
+        self.assertEqual(
+            extract_ui_strings_from_source(source, relative_path="crates/unrelated/src/lib.rs"),
+            [],
+        )
+        spawn_source = 'fn run() { bail!("model cannot be changed when resuming a subagent session"); }'
+        spawn_errors = extract_ui_strings_from_source(
+            spawn_source, relative_path="crates/agent/src/tools/spawn_agent_tool.rs",
+        )
+        self.assertEqual(
+            [item.source for item in spawn_errors],
+            ["model cannot be changed when resuming a subagent session"],
+        )
+
+    def test_extracts_compaction_error_and_opencode_catalog_errors(self) -> None:
+        compaction = extract_ui_strings_from_source(
+            'fn run() { error.context("Automatic context compaction failed"); }',
+            relative_path="crates/agent/src/thread.rs",
+        )
+        self.assertEqual([item.source for item in compaction], ["Automatic context compaction failed"])
+        self.assertEqual(compaction[0].kind, "thread_error_message")
+        source = '''
+fn discover() {
+    anyhow!("OpenCode catalog is missing {provider_key}");
+    bail!("OpenCode model metadata did not contain any compatible models");
+    bail!("OpenCode model catalog request timed out");
+    request.with_context(|| format!("requesting OpenCode catalog at {url}"));
+    bail!("OpenCode catalog request to {url} returned {}", response.status());
+    log::warn!("Failed to cache OpenCode model catalog: {error:#}");
+}
+'''
+        errors = extract_ui_strings_from_source(
+            source, relative_path="crates/language_models/src/provider/opencode.rs",
+        )
+        self.assertEqual(
+            {item.source for item in errors},
+            {
+                "OpenCode catalog is missing {provider_key}",
+                "OpenCode model metadata did not contain any compatible models",
+                "OpenCode model catalog request timed out",
+                "requesting OpenCode catalog at {url}",
+                "OpenCode catalog request to {url} returned {}",
+            },
+        )
+        self.assertEqual({item.kind for item in errors}, {"provider_model_error"})
+
     def test_extracts_deferred_git_graph_changed_file_count_fragments(self) -> None:
         source = "\n".join(
             [
@@ -3371,12 +3449,16 @@ class ExtractTests(unittest.TestCase):
                 "    }",
                 "    Some(AnnouncementContent {",
                 '        heading: "Introducing Parallel Agents".into(),',
-                '        description: "Run multiple threads of your favorite agents simultaneously across projects.".into(),',
+                '        description:',
+                '            "Run multiple threads of your favorite agents simultaneously across projects."',
+                '                .into(),',
                 "        bullet_items: vec![",
                 '            "Use your favorite agents in parallel".into(),',
                 "        ],",
                 '        primary_action_label: "Try Agentic Layout".into(),',
                 '        secondary_action_label: "Read Documentation".into(),',
+                '        primary_action_url: "https://delta.dev/".into(),',
+                '        secondary_action_url: "https://delta.dev/docs/getting-started".into(),',
                 "    });",
                 '    Self::new(IconName::Download, "Restart to Update");',
                 '    AnnouncementToast::new().heading("Introducing Parallel Agents");',
@@ -3402,6 +3484,28 @@ class ExtractTests(unittest.TestCase):
                 "Read Documentation",
                 "Restart to Update",
             },
+        )
+
+    def test_extracts_pending_binding_group_count(self) -> None:
+        source = '''
+fn group_bindings() {
+    PendingBindingRow {
+        action_name: format!("+{} keybinds", bindings.len()).into(),
+        is_group: true,
+    };
+    ProtocolPayload { action_name: "internal_action" };
+}
+'''
+        occurrences = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/which_key/src/pending_bindings.rs",
+        )
+        self.assertEqual([item.source for item in occurrences], ["+{} keybinds"])
+        occurrence = occurrences[0]
+        self.assertEqual(occurrence.kind, "label")
+        self.assertEqual(
+            source.encode()[occurrence.start_byte:occurrence.end_byte],
+            b'"+{} keybinds"',
         )
 
     def test_extracts_skills_illustration_source_badge_literals(self) -> None:

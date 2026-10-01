@@ -1457,9 +1457,16 @@ gzip -f --stdout --best "${target_dir}/${remote_server_triple}/release/remote_se
         )
         (script_dir / "bundle-mac").write_text(
             """
+zed_features=""
+remote_server_features=""
+if [[ "$debug" == true ]]; then
+    zed_features="--features util/debug-embed"
+    remote_server_features="--features debug-embed"
+fi
+cargo --config .cargo/bundle-config.toml build ${build_flag} ${zed_features} --package zed --package cli --target $target_triple
 # Build remote_server in separate invocation to prevent feature unification from other crates
 # from influencing dynamic libraries required by it.
-cargo --config .cargo/bundle-config.toml build ${build_flag} --package remote_server --target $target_triple
+cargo --config .cargo/bundle-config.toml build ${build_flag} ${remote_server_features} --package remote_server --target $target_triple
 function download_and_unpack() {
     local url=$1
     local path_to_unpack=$2
@@ -1567,6 +1574,8 @@ ZipZedAndItsFriendsDebug
         self.assertNotIn("zed-remote-server-linux", linux)
         self.assertNotIn("remote_server", macos)
         self.assertNotIn("zed-remote-server-macos", macos)
+        self.assertIn('zed_features="--features util/debug-embed"', macos)
+        self.assertIn("${zed_features} --package zed --package cli", macos)
         self.assertIn("function create_dmg_with_retry()", macos)
         self.assertIn("Retrying git binary download", macos)
         self.assertNotIn("BuildRemoteServer", windows)

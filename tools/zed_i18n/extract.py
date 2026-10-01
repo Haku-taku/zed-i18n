@@ -93,6 +93,11 @@ CALL_RULES: dict[str, tuple[int, str, str]] = {
 }
 
 STRUCT_FIELD_RULES: dict[tuple[str, str], tuple[str, str]] = {
+    ("AnnouncementContent", "description"): (
+        "announcement_description",
+        "announcement_description",
+    ),
+    ("PendingBindingRow", "action_name"): ("label", "PendingBindingRow.action_name"),
     ("ActionLink", "title"): ("settings_action_title", "ActionLink.title"),
     ("ActionLink", "description"): ("settings_action_description", "ActionLink.description"),
     ("ActionLink", "button_text"): ("settings_action_button", "ActionLink.button_text"),
@@ -208,6 +213,34 @@ AGENT_THREAD_TOOL_ERROR_SOURCES = {
     "Creating sibling threads is not supported in this environment",
     "Listing available agents is not supported in this environment",
     "Permission to run tool denied by user",
+}
+
+SUBAGENT_ERROR_SOURCES = {
+    "Model {model_id} is unavailable. Call list_agents_and_models to inspect available models.",
+    "The agent is nearing the end of its context window and has been stopped. You can prompt the thread again to have the agent wrap up or hand off its work.",
+    "User canceled",
+    "The agent reached the maximum number of tokens.",
+    "The agent reached the maximum number of allowed requests between user turns. Try prompting again.",
+    "The agent refused to process that prompt. Try again.",
+    "No response from subagent",
+    "No response from the agent. You can try messaging again.",
+    "{error:#}\n\nPartial subagent output (last 3 messages, up to 4096 characters each):\n\n{partial_output}",
+}
+
+SUBAGENT_RESUME_ERROR_SOURCES = {
+    "model cannot be changed when resuming a subagent session",
+}
+
+AGENT_COMPACTION_ERROR_SOURCES = {
+    "Automatic context compaction failed",
+}
+
+OPENCODE_CATALOG_ERROR_SOURCES = {
+    "OpenCode catalog is missing {provider_key}",
+    "OpenCode model metadata did not contain any compatible models",
+    "OpenCode model catalog request timed out",
+    "requesting OpenCode catalog at {url}",
+    "OpenCode catalog request to {url} returned {}",
 }
 
 AGENT_THREAD_PERMISSION_LABEL_SOURCES = {
@@ -2572,6 +2605,13 @@ def _allowed_literal_rules_for_path(
     if _is_agent_thread_path(relative_path):
         rules.append(
             (
+                AGENT_COMPACTION_ERROR_SOURCES,
+                "thread_error_message",
+                "AgentThread.compaction_error",
+            )
+        )
+        rules.append(
+            (
                 AGENT_THREAD_TOOL_ERROR_SOURCES,
                 "agent_tool_error",
                 "AgentThread.tool_error",
@@ -2584,6 +2624,12 @@ def _allowed_literal_rules_for_path(
                 "AgentThread.permission_option",
             )
         )
+    if relative_path == "crates/agent/src/agent.rs":
+        rules.append((SUBAGENT_ERROR_SOURCES, "agent_tool_error", "NativeSubagentHandle.error"))
+    if relative_path == "crates/agent/src/tools/spawn_agent_tool.rs":
+        rules.append((SUBAGENT_RESUME_ERROR_SOURCES, "agent_tool_error", "NativeSubagentHandle.error"))
+    if relative_path == "crates/language_models/src/provider/opencode.rs":
+        rules.append((OPENCODE_CATALOG_ERROR_SOURCES, "provider_model_error", "OpenCode.catalog_error"))
     if _is_agent_thread_view_path(relative_path):
         rules.append(
             (

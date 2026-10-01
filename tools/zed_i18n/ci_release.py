@@ -482,6 +482,12 @@ def patch_linux_remote_server_build(path: Path) -> None:
 def patch_macos_remote_server_build(path: Path) -> None:
     script = path.read_text(encoding="utf-8")
     script = re.sub(
+        r'^[ \t]*remote_server_features="[^"\r\n]*"\r?\n',
+        "",
+        script,
+        flags=re.MULTILINE,
+    )
+    script = re.sub(
         r"^# Build remote_server in separate invocation to prevent feature unification from other crates\r?\n"
         r".*?^cargo [^\r\n]*--package remote_server[^\r\n]*\r?\n\r?\n?",
         "",

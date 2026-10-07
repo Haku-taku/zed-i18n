@@ -1256,17 +1256,17 @@ fn initialization_sequence_label() -> &'static str {
     dependency("crates/x_ai_subscribed/Cargo.toml", "language_model", "localization")
 
     patch(
-        "crates/extensions_ui/src/extension_suggest.rs",
+        "crates/extensions_ui/src/extension_suggestions.rs",
         "SharedString::new_static(suggestion.description)",
         "SharedString::new_static(localization::translate_static(suggestion.description))",
     )
     patch(
-        "crates/extensions_ui/src/extension_suggest.rs",
+        "crates/extensions_ui/src/extension_suggestions.rs",
         ".with_title(suggestion.title)",
         ".with_title(localization::translate_static(suggestion.title))",
     )
     patch(
-        "crates/extensions_ui/src/extension_suggest.rs",
+        "crates/extensions_ui/src/extension_suggestions.rs",
         ".primary_message(suggestion.install_message)",
         ".primary_message(localization::translate_static(suggestion.install_message))",
     )
@@ -1517,9 +1517,9 @@ _EXPECTED_MANUAL_SITES: frozenset[tuple[str, str]] = frozenset({
     ("crates/language_models/src/provider/openai_subscribed.rs", "Sign in with your ChatGPT Plus or Pro subscription to use OpenAI models in Zed's agent."),
     ("crates/language_models/src/provider/x_ai_subscribed.rs", "Sign in with your SuperGrok subscription to use Grok models in Zed's agent."),
     ("crates/x_ai_subscribed/src/x_ai_subscribed.rs", "Login succeeded, but this Grok account cannot use the API (HTTP 403). Some plans do not include this access. You can also use the separate xAI provider with an API key from console.x.ai."),
-    ("crates/extensions_ui/src/extension_suggest.rs", "Emmet expands abbreviations such as `ul>li*3` into HTML and `m10` into CSS."),
-    ("crates/extensions_ui/src/extension_suggest.rs", "Emmet is available for this file"),
-    ("crates/extensions_ui/src/extension_suggest.rs", "Install Emmet"),
+    ("crates/extension_suggest/src/extension_suggest.rs", "Emmet expands abbreviations such as `ul>li*3` into HTML and `m10` into CSS."),
+    ("crates/extension_suggest/src/extension_suggest.rs", "Emmet is available for this file"),
+    ("crates/extension_suggest/src/extension_suggest.rs", "Install Emmet"),
     ("crates/multi_buffer/src/multi_buffer.rs", "untitled"),
     ("crates/onboarding/src/basics_page.rs", "Dark"),
     ("crates/onboarding/src/basics_page.rs", "Light"),

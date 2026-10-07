@@ -38,7 +38,7 @@ PATCH_TARGETS = (
     "crates/language_models/src/provider/x_ai_subscribed.rs",
     "crates/x_ai_subscribed/Cargo.toml",
     "crates/x_ai_subscribed/src/x_ai_subscribed.rs",
-    "crates/extensions_ui/src/extension_suggest.rs",
+    "crates/extensions_ui/src/extension_suggestions.rs",
     "crates/language_model/Cargo.toml",
     "crates/language_model/src/registry.rs",
     "crates/language_selector/Cargo.toml",
@@ -273,7 +273,7 @@ class RuntimeOverlayPatchTests(unittest.TestCase):
             "localization.workspace = true",
             self._read("crates/x_ai_subscribed/Cargo.toml"),
         )
-        extension_suggest = self._read("crates/extensions_ui/src/extension_suggest.rs")
+        extension_suggest = self._read("crates/extensions_ui/src/extension_suggestions.rs")
         for field in ("description", "title", "install_message"):
             self.assertIn(
                 f"localization::translate_static(suggestion.{field})", extension_suggest

@@ -124,11 +124,11 @@ STRUCT_FIELD_RULES: dict[tuple[str, str], tuple[str, str]] = {
         "FastModeConfirmation.message",
     ),
     ("SkillLoadError", "message"): ("skill_load_error", "SkillLoadError.message"),
-    ("LanguageSuggestion", "title"): ("notification_title", "LanguageSuggestion.title"),
-    ("LanguageSuggestion", "description"): ("notification", "LanguageSuggestion.description"),
-    ("LanguageSuggestion", "install_message"): (
+    ("LanguageAdditionSuggestion", "title"): ("notification_title", "LanguageAdditionSuggestion.title"),
+    ("LanguageAdditionSuggestion", "description"): ("notification", "LanguageAdditionSuggestion.description"),
+    ("LanguageAdditionSuggestion", "install_message"): (
         "notification_message",
-        "LanguageSuggestion.install_message",
+        "LanguageAdditionSuggestion.install_message",
     ),
 }
 
@@ -2379,12 +2379,73 @@ def _extract_exact_line_literal_occurrences(
     return occurrences
 
 
+# Indirect UI values whose consumers are outside the literal's expression.
+# Scope these to their production function, since several files repeat the
+# same text in assertions, protocol handling, or diagnostic output.
+FUNCTION_UI_LITERAL_RULES: dict[str, dict[str, tuple[set[str], str]]] = {
+    "crates/agent_ui/src/conversation_view.rs": {
+        "plan_summary_label": ({"All Done", "Cancelled", "Finished", "{entry_count} Tasks"}, "label"),
+    },
+    "crates/agent_ui/src/conversation_view/thread_view.rs": {
+        "submission_text_parts": ({"[Resource attachment]", "[Image attachment]", "[Audio attachment]", "[Unsupported attachment]"}, "label"),
+        "render_recoverable_submissions": ({"Sending message…", "Waiting for message to appear…", "Message failed to send: {}", "Message cancelled", "Message"}, "label"),
+        "regenerate": ({"The conversation was rewound, but the message became read-only and was not resent."}, "thread_error_message"),
+    },
+    "crates/agent_ui/src/message_editor.rs": {
+        "set_source_message": ({"[Unsupported message content — this message cannot be edited or resent]", "\n[Unsupported message content — this message cannot be edited or resent]"}, "thread_error_message"),
+    },
+    "crates/acp_thread/src/acp_thread.rs": {
+        "unsupported": ({"Audio content is not supported.", "Unknown content type is not supported.", "This content is not supported."}, "thread_error_message"),
+        "from_prepared": ({"Unsupported tool call content."}, "thread_error_message"),
+    },
+    "crates/acp_thread/src/diff.rs": {
+        "new": ({"Diff preview unavailable: {error}\n\n{}"}, "thread_error_message"),
+        "diff_change_label": ({"Added {}", "Deleted {}", "Modified {}", "Moved {} → {}", "Copied {} → {}", "Unsupported file operation"}, "label"),
+    },
+    "crates/git_ui/src/git_panel.rs": {
+        "revert_entries": ({"Trash ", "Trash", "Discard changes to {tracked_count} files?", "Discard", "Trash {untracked_count} files?", "Discard changes to {tracked_count} files and trash {untracked_count} files?", "Discard and Trash", "Failed to revert changes"}, "prompt_message"),
+        "build_context_menu": ({"File", "Files"}, "label"),
+    },
+    "crates/tabular_data_preview/src/parser.rs": {
+        "parse_in_background": ({"Preview requires a single file"}, "input_error"),
+        "from_json_lines": ({"Cannot preview JSONL line {}: expected a JSON object"}, "input_error"),
+    },
+}
+
+
+def _function_ui_literal_rule(source_bytes: bytes, node, rules):
+    function_name = None
+    current = node.parent
+    while current is not None:
+        if current.type == "macro_invocation":
+            macro = current.child_by_field_name("macro")
+            if macro is not None and _node_text(source_bytes, macro).startswith(("log::", "tracing::")):
+                return None
+        if current.type == "function_item" and function_name is None:
+            name = current.child_by_field_name("name")
+            if name is not None:
+                function_name = _node_text(source_bytes, name)
+        sibling = current.prev_named_sibling
+        while sibling is not None and sibling.type == "attribute_item":
+            attribute = _node_text(source_bytes, sibling)
+            if re.search(r"#\[\s*(?:cfg\(\s*test\s*\)|(?:gpui::)?test\b)", attribute):
+                return None
+            sibling = sibling.prev_named_sibling
+        current = current.parent
+    rule = rules.get(function_name)
+    if rule is None:
+        return None
+    sources, kind = rule
+    return sources, kind, f"{function_name}.ui"
+
+
 def _extract_allowed_literal_occurrences(
     source_bytes: bytes,
     relative_path: str,
 ) -> list[StringOccurrence]:
     rules = _allowed_literal_rules_for_path(relative_path)
-    if not rules:
+    function_rules = FUNCTION_UI_LITERAL_RULES.get(relative_path, {})
+    if not rules and not function_rules:
         return []
 
     parser = _rust_parser()
@@ -2399,7 +2460,9 @@ def _extract_allowed_literal_occurrences(
 
         literal = _node_text(source_bytes, node)
         source = parse_rust_string_literal(_collapse_rust_string_line_continuations(literal))
-        for allowed_sources, kind, call in rules:
+        scoped_rule = _function_ui_literal_rule(source_bytes, node, function_rules) if function_rules else None
+        node_rules = [*rules, scoped_rule] if scoped_rule is not None else rules
+        for allowed_sources, kind, call in node_rules:
             if source not in allowed_sources:
                 continue
             occurrences.append(

@@ -7,6 +7,37 @@ from tools.zed_i18n.extract import extract_repository, extract_ui_strings_from_s
 
 
 class ExtractTests(unittest.TestCase):
+    def test_extracts_v1_23_function_scoped_ui_values(self) -> None:
+        cases = [
+            ("crates/agent_ui/src/conversation_view.rs", "plan_summary_label", 'if done { "All Done".to_owned() } else { format!("{entry_count} Tasks") }', {"All Done", "{entry_count} Tasks"}),
+            ("crates/agent_ui/src/conversation_view/thread_view.rs", "submission_text_parts", 'match block { Image => "[Image attachment]", _ => "[Unsupported attachment]" }', {"[Image attachment]", "[Unsupported attachment]"}),
+            ("crates/agent_ui/src/conversation_view/thread_view.rs", "render_recoverable_submissions", 'match state { Pending => ("Sending message…".into(), false), Failed => (format!("Message failed to send: {}", error).into(), true) }', {"Sending message…", "Message failed to send: {}"}),
+            ("crates/agent_ui/src/message_editor.rs", "set_source_message", r'let value = "\n[Unsupported message content — this message cannot be edited or resent]";', {"\n[Unsupported message content — this message cannot be edited or resent]"}),
+            ("crates/acp_thread/src/acp_thread.rs", "unsupported", 'match content { Audio => "Audio content is not supported.", _ => "Unknown content type is not supported." }', {"Audio content is not supported.", "Unknown content type is not supported."}),
+            ("crates/acp_thread/src/diff.rs", "diff_change_label", 'match op { Move => format!("Moved {} → {}", old, new), _ => "Unsupported file operation".to_owned() }', {"Moved {} → {}", "Unsupported file operation"}),
+            ("crates/git_ui/src/git_panel.rs", "revert_entries", 'let pair = (format!("Trash {untracked_count} files?"), "Trash"); let prefix = "Trash ";', {"Trash {untracked_count} files?", "Trash", "Trash "}),
+            ("crates/git_ui/src/git_panel.rs", "build_context_menu", 'let label = if count == 1 { "File" } else { "Files" };', {"File", "Files"}),
+            ("crates/tabular_data_preview/src/parser.rs", "from_json_lines", 'let error = format!("Cannot preview JSONL line {}: expected a JSON object", line + 1);', {"Cannot preview JSONL line {}: expected a JSON object"}),
+        ]
+        for path, function, body, expected in cases:
+            with self.subTest(path=path, function=function):
+                source = f"fn {function}() {{ {body} }}"
+                occurrences = extract_ui_strings_from_source(source, relative_path=path)
+                self.assertEqual({o.source for o in occurrences}, expected)
+                self.assertEqual(len(occurrences), len(expected))
+                for occurrence in occurrences:
+                    self.assertTrue(source.encode()[occurrence.start_byte:occurrence.end_byte].startswith(b'"'))
+
+    def test_function_scoped_ui_values_exclude_tests_logs_and_other_contexts(self) -> None:
+        source = '\n'.join([
+            'fn plan_summary_label() { log::debug!("All Done"); tracing::info!("Cancelled"); let counter = format!("{}/{entry_count}", completed); }',
+            'fn protocol_value() { let value = "All Done"; }',
+            '#[cfg(test)] mod tests { fn plan_summary_label() { assert_eq!(value, "All Done"); } }',
+            '#[gpui::test] fn plan_summary_label() { let value = "Cancelled"; }',
+        ])
+        self.assertEqual(extract_ui_strings_from_source(source, relative_path="crates/agent_ui/src/conversation_view.rs"), [])
+        self.assertEqual(extract_ui_strings_from_source('fn plan_summary_label() { "All Done" }', relative_path="crates/protocol/src/lib.rs"), [])
+
     def test_extracts_v1_20_1_indirect_ui_strings(self) -> None:
         emmet_source = "\n".join(
             [
@@ -4843,7 +4874,7 @@ fn group_bindings() {
     def test_extracts_language_suggestion_notification_fields(self) -> None:
         source = "\n".join(
             [
-                "const SUGGESTIONS_BY_LANGUAGE: &[LanguageSuggestion] = &[LanguageSuggestion {",
+                "const SUGGESTIONS_BY_LANGUAGE: &[LanguageAdditionSuggestion] = &[LanguageAdditionSuggestion {",
                 '    extension_id: "emmet",',
                 '    languages: &["HTML", "Vue.js"],',
                 '    title: "Emmet is available for this file",',
@@ -4856,7 +4887,7 @@ fn group_bindings() {
 
         occurrences = extract_ui_strings_from_source(
             source,
-            relative_path="crates/extensions_ui/src/extension_suggest.rs",
+            relative_path="crates/extension_suggest/src/extension_suggest.rs",
         )
 
         self.assertEqual(
@@ -4865,10 +4896,10 @@ fn group_bindings() {
                 (
                     "Emmet expands abbreviations such as `ul>li*3` into HTML and `m10` into CSS.",
                     "notification",
-                    "LanguageSuggestion.description",
+                    "LanguageAdditionSuggestion.description",
                 ),
-                ("Emmet is available for this file", "notification_title", "LanguageSuggestion.title"),
-                ("Install Emmet", "notification_message", "LanguageSuggestion.install_message"),
+                ("Emmet is available for this file", "notification_title", "LanguageAdditionSuggestion.title"),
+                ("Install Emmet", "notification_message", "LanguageAdditionSuggestion.install_message"),
             ],
         )
 

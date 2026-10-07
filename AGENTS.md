@@ -105,6 +105,7 @@ The final `translations/<lang>.json` is produced by reviewing model outputs — 
 - Zed Windows builds should run outside the sandbox.
 - Use `.cache/zed/target` as the shared local Cargo cache via `CARGO_TARGET_DIR`.
 - Start local Windows release builds with `-j 8`; increase only if CPU and memory headroom are comfortable.
+- After applying the universal overlay, run `cargo update --workspace --offline` before checking with `--locked`. The allowed `Cargo.lock` changes are the new local `localization` package and its dependency references, plus `auto_update_helper` references to the already locked `serde` and `serde_json_lenient` packages required by the existing updater localization patch. These changes do not require additional confirmation. Verify that no existing packages, versions, sources, checksums, or dependency references are removed or changed, and that no other packages or dependency references are added. Investigate any difference outside this scope before proceeding.
 
 ## Generated Files
 

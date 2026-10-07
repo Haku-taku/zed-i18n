@@ -7,6 +7,37 @@ from tools.zed_i18n.extract import extract_repository, extract_ui_strings_from_s
 
 
 class ExtractTests(unittest.TestCase):
+    def test_extracts_v1_23_function_scoped_ui_values(self) -> None:
+        cases = [
+            ("crates/agent_ui/src/conversation_view.rs", "plan_summary_label", 'if done { "All Done".to_owned() } else { format!("{entry_count} Tasks") }', {"All Done", "{entry_count} Tasks"}),
+            ("crates/agent_ui/src/conversation_view/thread_view.rs", "submission_text_parts", 'match block { Image => "[Image attachment]", _ => "[Unsupported attachment]" }', {"[Image attachment]", "[Unsupported attachment]"}),
+            ("crates/agent_ui/src/conversation_view/thread_view.rs", "render_recoverable_submissions", 'match state { Pending => ("Sending message…".into(), false), Failed => (format!("Message failed to send: {}", error).into(), true) }', {"Sending message…", "Message failed to send: {}"}),
+            ("crates/agent_ui/src/message_editor.rs", "set_source_message", r'let value = "\n[Unsupported message content — this message cannot be edited or resent]";', {"\n[Unsupported message content — this message cannot be edited or resent]"}),
+            ("crates/acp_thread/src/acp_thread.rs", "unsupported", 'match content { Audio => "Audio content is not supported.", _ => "Unknown content type is not supported." }', {"Audio content is not supported.", "Unknown content type is not supported."}),
+            ("crates/acp_thread/src/diff.rs", "diff_change_label", 'match op { Move => format!("Moved {} → {}", old, new), _ => "Unsupported file operation".to_owned() }', {"Moved {} → {}", "Unsupported file operation"}),
+            ("crates/git_ui/src/git_panel.rs", "revert_entries", 'let pair = (format!("Trash {untracked_count} files?"), "Trash"); let prefix = "Trash ";', {"Trash {untracked_count} files?", "Trash", "Trash "}),
+            ("crates/git_ui/src/git_panel.rs", "build_context_menu", 'let label = if count == 1 { "File" } else { "Files" };', {"File", "Files"}),
+            ("crates/tabular_data_preview/src/parser.rs", "from_json_lines", 'let error = format!("Cannot preview JSONL line {}: expected a JSON object", line + 1);', {"Cannot preview JSONL line {}: expected a JSON object"}),
+        ]
+        for path, function, body, expected in cases:
+            with self.subTest(path=path, function=function):
+                source = f"fn {function}() {{ {body} }}"
+                occurrences = extract_ui_strings_from_source(source, relative_path=path)
+                self.assertEqual({o.source for o in occurrences}, expected)
+                self.assertEqual(len(occurrences), len(expected))
+                for occurrence in occurrences:
+                    self.assertTrue(source.encode()[occurrence.start_byte:occurrence.end_byte].startswith(b'"'))
+
+    def test_function_scoped_ui_values_exclude_tests_logs_and_other_contexts(self) -> None:
+        source = '\n'.join([
+            'fn plan_summary_label() { log::debug!("All Done"); tracing::info!("Cancelled"); let counter = format!("{}/{entry_count}", completed); }',
+            'fn protocol_value() { let value = "All Done"; }',
+            '#[cfg(test)] mod tests { fn plan_summary_label() { assert_eq!(value, "All Done"); } }',
+            '#[gpui::test] fn plan_summary_label() { let value = "Cancelled"; }',
+        ])
+        self.assertEqual(extract_ui_strings_from_source(source, relative_path="crates/agent_ui/src/conversation_view.rs"), [])
+        self.assertEqual(extract_ui_strings_from_source('fn plan_summary_label() { "All Done" }', relative_path="crates/protocol/src/lib.rs"), [])
+
     def test_extracts_v1_20_1_indirect_ui_strings(self) -> None:
         emmet_source = "\n".join(
             [
@@ -1350,6 +1381,84 @@ class ExtractTests(unittest.TestCase):
             by_source["Permission to run tool denied by user"].kind,
             "agent_tool_error",
         )
+
+    def test_extracts_subagent_errors_with_format_tokens_and_continuations(self) -> None:
+        source = r'''
+fn send() {
+    anyhow!("Model {model_id} is unavailable. Call list_agents_and_models to inspect available models.");
+    anyhow!("The agent is nearing the end of its context window and has been \
+             stopped. You can prompt the thread again to have the agent wrap up \
+             or hand off its work.");
+    anyhow!("User canceled");
+    anyhow!("The agent reached the maximum number of tokens.");
+    anyhow!("The agent reached the maximum number of allowed requests between user turns. Try prompting again.");
+    anyhow!("The agent refused to process that prompt. Try again.");
+    response.context("No response from subagent");
+    anyhow!("No response from the agent. You can try messaging again.");
+    anyhow!("{error:#}\n\nPartial subagent output (last 3 messages, up to 4096 characters each):\n\n{partial_output}");
+    log::warn!("internal subagent trace");
+}
+'''
+        expected = {
+            "Model {model_id} is unavailable. Call list_agents_and_models to inspect available models.",
+            "The agent is nearing the end of its context window and has been stopped. You can prompt the thread again to have the agent wrap up or hand off its work.",
+            "User canceled",
+            "The agent reached the maximum number of tokens.",
+            "The agent reached the maximum number of allowed requests between user turns. Try prompting again.",
+            "The agent refused to process that prompt. Try again.",
+            "No response from subagent",
+            "No response from the agent. You can try messaging again.",
+            "{error:#}\n\nPartial subagent output (last 3 messages, up to 4096 characters each):\n\n{partial_output}",
+        }
+        occurrences = extract_ui_strings_from_source(
+            source, relative_path="crates/agent/src/agent.rs",
+        )
+        self.assertEqual({item.source for item in occurrences}, expected)
+        self.assertEqual({item.kind for item in occurrences}, {"agent_tool_error"})
+        self.assertEqual(
+            extract_ui_strings_from_source(source, relative_path="crates/unrelated/src/lib.rs"),
+            [],
+        )
+        spawn_source = 'fn run() { bail!("model cannot be changed when resuming a subagent session"); }'
+        spawn_errors = extract_ui_strings_from_source(
+            spawn_source, relative_path="crates/agent/src/tools/spawn_agent_tool.rs",
+        )
+        self.assertEqual(
+            [item.source for item in spawn_errors],
+            ["model cannot be changed when resuming a subagent session"],
+        )
+
+    def test_extracts_compaction_error_and_opencode_catalog_errors(self) -> None:
+        compaction = extract_ui_strings_from_source(
+            'fn run() { error.context("Automatic context compaction failed"); }',
+            relative_path="crates/agent/src/thread.rs",
+        )
+        self.assertEqual([item.source for item in compaction], ["Automatic context compaction failed"])
+        self.assertEqual(compaction[0].kind, "thread_error_message")
+        source = '''
+fn discover() {
+    anyhow!("OpenCode catalog is missing {provider_key}");
+    bail!("OpenCode model metadata did not contain any compatible models");
+    bail!("OpenCode model catalog request timed out");
+    request.with_context(|| format!("requesting OpenCode catalog at {url}"));
+    bail!("OpenCode catalog request to {url} returned {}", response.status());
+    log::warn!("Failed to cache OpenCode model catalog: {error:#}");
+}
+'''
+        errors = extract_ui_strings_from_source(
+            source, relative_path="crates/language_models/src/provider/opencode.rs",
+        )
+        self.assertEqual(
+            {item.source for item in errors},
+            {
+                "OpenCode catalog is missing {provider_key}",
+                "OpenCode model metadata did not contain any compatible models",
+                "OpenCode model catalog request timed out",
+                "requesting OpenCode catalog at {url}",
+                "OpenCode catalog request to {url} returned {}",
+            },
+        )
+        self.assertEqual({item.kind for item in errors}, {"provider_model_error"})
 
     def test_extracts_deferred_git_graph_changed_file_count_fragments(self) -> None:
         source = "\n".join(
@@ -3371,12 +3480,16 @@ class ExtractTests(unittest.TestCase):
                 "    }",
                 "    Some(AnnouncementContent {",
                 '        heading: "Introducing Parallel Agents".into(),',
-                '        description: "Run multiple threads of your favorite agents simultaneously across projects.".into(),',
+                '        description:',
+                '            "Run multiple threads of your favorite agents simultaneously across projects."',
+                '                .into(),',
                 "        bullet_items: vec![",
                 '            "Use your favorite agents in parallel".into(),',
                 "        ],",
                 '        primary_action_label: "Try Agentic Layout".into(),',
                 '        secondary_action_label: "Read Documentation".into(),',
+                '        primary_action_url: "https://delta.dev/".into(),',
+                '        secondary_action_url: "https://delta.dev/docs/getting-started".into(),',
                 "    });",
                 '    Self::new(IconName::Download, "Restart to Update");',
                 '    AnnouncementToast::new().heading("Introducing Parallel Agents");',
@@ -3402,6 +3515,28 @@ class ExtractTests(unittest.TestCase):
                 "Read Documentation",
                 "Restart to Update",
             },
+        )
+
+    def test_extracts_pending_binding_group_count(self) -> None:
+        source = '''
+fn group_bindings() {
+    PendingBindingRow {
+        action_name: format!("+{} keybinds", bindings.len()).into(),
+        is_group: true,
+    };
+    ProtocolPayload { action_name: "internal_action" };
+}
+'''
+        occurrences = extract_ui_strings_from_source(
+            source,
+            relative_path="crates/which_key/src/pending_bindings.rs",
+        )
+        self.assertEqual([item.source for item in occurrences], ["+{} keybinds"])
+        occurrence = occurrences[0]
+        self.assertEqual(occurrence.kind, "label")
+        self.assertEqual(
+            source.encode()[occurrence.start_byte:occurrence.end_byte],
+            b'"+{} keybinds"',
         )
 
     def test_extracts_skills_illustration_source_badge_literals(self) -> None:
@@ -4739,7 +4874,7 @@ class ExtractTests(unittest.TestCase):
     def test_extracts_language_suggestion_notification_fields(self) -> None:
         source = "\n".join(
             [
-                "const SUGGESTIONS_BY_LANGUAGE: &[LanguageSuggestion] = &[LanguageSuggestion {",
+                "const SUGGESTIONS_BY_LANGUAGE: &[LanguageAdditionSuggestion] = &[LanguageAdditionSuggestion {",
                 '    extension_id: "emmet",',
                 '    languages: &["HTML", "Vue.js"],',
                 '    title: "Emmet is available for this file",',
@@ -4752,7 +4887,7 @@ class ExtractTests(unittest.TestCase):
 
         occurrences = extract_ui_strings_from_source(
             source,
-            relative_path="crates/extensions_ui/src/extension_suggest.rs",
+            relative_path="crates/extension_suggest/src/extension_suggest.rs",
         )
 
         self.assertEqual(
@@ -4761,10 +4896,10 @@ class ExtractTests(unittest.TestCase):
                 (
                     "Emmet expands abbreviations such as `ul>li*3` into HTML and `m10` into CSS.",
                     "notification",
-                    "LanguageSuggestion.description",
+                    "LanguageAdditionSuggestion.description",
                 ),
-                ("Emmet is available for this file", "notification_title", "LanguageSuggestion.title"),
-                ("Install Emmet", "notification_message", "LanguageSuggestion.install_message"),
+                ("Emmet is available for this file", "notification_title", "LanguageAdditionSuggestion.title"),
+                ("Install Emmet", "notification_message", "LanguageAdditionSuggestion.install_message"),
             ],
         )
 

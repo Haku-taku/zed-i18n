@@ -167,11 +167,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 42878,
+        "end_byte": 44092,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 951,
-        "start_byte": 42770
+        "line": 974,
+        "start_byte": 43984
       }
     ],
     "status": "accepted"
@@ -1274,11 +1274,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 2135,
+        "end_byte": 2060,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 57,
-        "start_byte": 2107
+        "line": 56,
+        "start_byte": 2032
       }
     ],
     "status": "accepted"
@@ -1287,19 +1287,19 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 724,
+        "end_byte": 649,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 20,
-        "start_byte": 708
+        "line": 19,
+        "start_byte": 633
       },
       {
         "call": "ListBulletItem::new",
-        "end_byte": 940,
+        "end_byte": 865,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 26,
-        "start_byte": 924
+        "line": 25,
+        "start_byte": 849
       }
     ],
     "status": "accepted"
@@ -1308,11 +1308,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1345,
+        "end_byte": 1270,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 37,
-        "start_byte": 1318
+        "line": 36,
+        "start_byte": 1243
       }
     ],
     "status": "accepted"
@@ -3132,11 +3132,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1167,
+        "end_byte": 1092,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 30,
-        "start_byte": 1116
+        "line": 29,
+        "start_byte": 1041
       }
     ],
     "status": "accepted"
@@ -3163,19 +3163,6 @@
         "kind": "debugger_memory_width",
         "line": 685,
         "start_byte": 25003
-      }
-    ],
-    "status": "accepted"
-  },
-  "2,000 accepted edit predictions": {
-    "occurrences": [
-      {
-        "call": "ListBulletItem::new",
-        "end_byte": 324,
-        "file": "crates/ai_onboarding/src/plan_definitions.rs",
-        "kind": "list_bullet_item",
-        "line": 10,
-        "start_byte": 291
       }
     ],
     "status": "accepted"
@@ -4989,11 +4976,11 @@
       },
       {
         "call": "header",
-        "end_byte": 44869,
+        "end_byte": 46083,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_header",
-        "line": 1003,
-        "start_byte": 44860
+        "line": 1026,
+        "start_byte": 46074
       },
       {
         "call": "Button::new",
@@ -7047,11 +7034,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 33967,
+        "end_byte": 35181,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 785,
-        "start_byte": 33956
+        "line": 808,
+        "start_byte": 35170
       }
     ],
     "status": "accepted"
@@ -7579,32 +7566,6 @@
         "kind": "label",
         "line": 866,
         "start_byte": 33414
-      }
-    ],
-    "status": "accepted"
-  },
-  "Alternatively, you can continue to use GitHub Copilot as that's already set up.": {
-    "occurrences": [
-      {
-        "call": "Label::new",
-        "end_byte": 1464,
-        "file": "crates/ai_onboarding/src/edit_prediction_onboarding_content.rs",
-        "kind": "label",
-        "line": 48,
-        "start_byte": 1383
-      }
-    ],
-    "status": "accepted"
-  },
-  "Alternatively, you can use GitHub Copilot as your edit prediction provider.": {
-    "occurrences": [
-      {
-        "call": "Label::new",
-        "end_byte": 1579,
-        "file": "crates/ai_onboarding/src/edit_prediction_onboarding_content.rs",
-        "kind": "label",
-        "line": 50,
-        "start_byte": 1502
       }
     ],
     "status": "accepted"
@@ -13223,11 +13184,11 @@
     "occurrences": [
       {
         "call": "entry",
-        "end_byte": 57165,
+        "end_byte": 59567,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1274,
-        "start_byte": 57065
+        "line": 1320,
+        "start_byte": 59467
       }
     ],
     "status": "accepted"
@@ -13314,11 +13275,11 @@
     "occurrences": [
       {
         "call": "Tooltip::with_meta",
-        "end_byte": 18323,
+        "end_byte": 18503,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "tooltip_meta",
-        "line": 391,
-        "start_byte": 18308
+        "line": 396,
+        "start_byte": 18488
       }
     ],
     "status": "accepted"
@@ -13903,11 +13864,11 @@
     "occurrences": [
       {
         "call": "action_doc_comment",
-        "end_byte": 4223,
+        "end_byte": 4380,
         "file": "crates/edit_prediction/src/edit_prediction.rs",
         "kind": "action_description",
-        "line": 115,
-        "start_byte": 4188
+        "line": 119,
+        "start_byte": 4345
       }
     ],
     "status": "accepted"
@@ -16586,19 +16547,6 @@
     ],
     "status": "accepted"
   },
-  "Configure Copilot": {
-    "occurrences": [
-      {
-        "call": "Button::new",
-        "end_byte": 1848,
-        "file": "crates/ai_onboarding/src/edit_prediction_onboarding_content.rs",
-        "kind": "button",
-        "line": 58,
-        "start_byte": 1829
-      }
-    ],
-    "status": "accepted"
-  },
   "Configure Default Model": {
     "occurrences": [
       {
@@ -16616,11 +16564,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 42582,
+        "end_byte": 43796,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 947,
-        "start_byte": 42556
+        "line": 970,
+        "start_byte": 43770
       }
     ],
     "status": "accepted"
@@ -16721,11 +16669,11 @@
       },
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 28626,
+        "end_byte": 29840,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 645,
-        "start_byte": 28605
+        "line": 668,
+        "start_byte": 29819
       },
       {
         "call": "SubPageLink.title",
@@ -16781,11 +16729,19 @@
     "occurrences": [
       {
         "call": "Tooltip::with_meta",
-        "end_byte": 18399,
+        "end_byte": 18579,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "tooltip_meta",
-        "line": 393,
-        "start_byte": 18377
+        "line": 398,
+        "start_byte": 18557
+      },
+      {
+        "call": "tooltip",
+        "end_byte": 22556,
+        "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
+        "kind": "tooltip",
+        "line": 480,
+        "start_byte": 22534
       }
     ],
     "status": "accepted"
@@ -19149,11 +19105,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 47003,
+        "end_byte": 48217,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1057,
-        "start_byte": 46971
+        "line": 1080,
+        "start_byte": 48185
       }
     ],
     "status": "accepted"
@@ -22733,11 +22689,11 @@
     "occurrences": [
       {
         "call": "toggleable_entry",
-        "end_byte": 58505,
+        "end_byte": 60907,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1304,
-        "start_byte": 58496
+        "line": 1350,
+        "start_byte": 60898
       },
       {
         "call": "add_filter",
@@ -30095,11 +30051,11 @@
     "occurrences": [
       {
         "call": "entry",
-        "end_byte": 30603,
+        "end_byte": 31817,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 695,
-        "start_byte": 30569
+        "line": 718,
+        "start_byte": 31783
       }
     ],
     "status": "accepted"
@@ -30377,11 +30333,11 @@
     "occurrences": [
       {
         "call": "tooltip",
-        "end_byte": 21858,
+        "end_byte": 22312,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "tooltip",
-        "line": 465,
-        "start_byte": 21834
+        "line": 476,
+        "start_byte": 22288
       }
     ],
     "status": "accepted"
@@ -31171,11 +31127,11 @@
     "occurrences": [
       {
         "call": "header",
-        "end_byte": 34640,
+        "end_byte": 35854,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_header",
-        "line": 800,
-        "start_byte": 34625
+        "line": 823,
+        "start_byte": 35839
       }
     ],
     "status": "accepted"
@@ -31262,11 +31218,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 36110,
+        "end_byte": 37324,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "platform_modifier_format",
-        "line": 823,
-        "start_byte": 35874,
+        "line": 846,
+        "start_byte": 37088,
         "translation_note": "The {modifier} placeholder is the platform key name: alt on Windows/Linux and option on macOS. Preserve the placeholder and place it naturally."
       }
     ],
@@ -31276,11 +31232,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 34990,
+        "end_byte": 36204,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 805,
-        "start_byte": 34905
+        "line": 828,
+        "start_byte": 36119
       }
     ],
     "status": "accepted"
@@ -32701,11 +32657,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 34714,
+        "end_byte": 35928,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 802,
-        "start_byte": 34707
+        "line": 825,
+        "start_byte": 35921
       },
       {
         "call": "strum::VariantNames",
@@ -32994,27 +32950,27 @@
       },
       {
         "call": "aria_label",
-        "end_byte": 21342,
+        "end_byte": 21796,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "accessibility_label",
-        "line": 457,
-        "start_byte": 21325
+        "line": 468,
+        "start_byte": 21779
       },
       {
         "call": "Tooltip::with_meta",
-        "end_byte": 22336,
+        "end_byte": 22904,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "tooltip",
-        "line": 475,
-        "start_byte": 22319
+        "line": 488,
+        "start_byte": 22887
       },
       {
         "call": "Label::new",
-        "end_byte": 50081,
+        "end_byte": 51305,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 1132,
-        "start_byte": 50064
+        "line": 1155,
+        "start_byte": 51288
       }
     ],
     "status": "accepted"
@@ -33036,19 +32992,19 @@
     "occurrences": [
       {
         "call": "aria_label",
-        "end_byte": 18708,
+        "end_byte": 18888,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "accessibility_label",
-        "line": 400,
-        "start_byte": 18690
+        "line": 405,
+        "start_byte": 18870
       },
       {
         "call": "Tooltip::with_meta",
-        "end_byte": 19015,
+        "end_byte": 19195,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "tooltip",
-        "line": 404,
-        "start_byte": 18997
+        "line": 409,
+        "start_byte": 19177
       },
       {
         "call": "SettingsPageItem::SectionHeader",
@@ -33309,11 +33265,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 28127,
+        "end_byte": 29341,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 629,
-        "start_byte": 28073
+        "line": 652,
+        "start_byte": 29287
       }
     ],
     "status": "accepted"
@@ -33322,11 +33278,24 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 32718,
+        "end_byte": 33932,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 750,
-        "start_byte": 32680
+        "line": 773,
+        "start_byte": 33894
+      }
+    ],
+    "status": "accepted"
+  },
+  "Edit predictions are no longer included in the Free plan. Upgrade to Pro for unlimited edit predictions.": {
+    "occurrences": [
+      {
+        "call": "MessageNotification::new",
+        "end_byte": 134940,
+        "file": "crates/edit_prediction/src/edit_prediction.rs",
+        "kind": "notification",
+        "line": 3596,
+        "start_byte": 134812
       }
     ],
     "status": "accepted"
@@ -34150,11 +34119,11 @@
     "occurrences": [
       {
         "call": "tooltip",
-        "end_byte": 22206,
+        "end_byte": 22774,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "tooltip",
-        "line": 471,
-        "start_byte": 22191
+        "line": 484,
+        "start_byte": 22759
       }
     ],
     "status": "accepted"
@@ -36089,11 +36058,11 @@
     "occurrences": [
       {
         "call": "submenu",
-        "end_byte": 58368,
+        "end_byte": 60770,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_submenu",
-        "line": 1302,
-        "start_byte": 58356
+        "line": 1348,
+        "start_byte": 60758
       }
     ],
     "status": "accepted"
@@ -41808,11 +41777,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 52320,
+        "end_byte": 53530,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1181,
-        "start_byte": 52295
+        "line": 1204,
+        "start_byte": 53505
       }
     ],
     "status": "accepted"
@@ -42884,11 +42853,11 @@
     "occurrences": [
       {
         "call": "link",
-        "end_byte": 48043,
+        "end_byte": 49257,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "link",
-        "line": 1078,
-        "start_byte": 48019
+        "line": 1101,
+        "start_byte": 49233
       }
     ],
     "status": "accepted"
@@ -44209,11 +44178,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 40225,
+        "end_byte": 41439,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 897,
-        "start_byte": 39906
+        "line": 920,
+        "start_byte": 41120
       }
     ],
     "status": "accepted"
@@ -50293,11 +50262,11 @@
       },
       {
         "call": "link_with_handler",
-        "end_byte": 51246,
+        "end_byte": 52456,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "link",
-        "line": 1158,
-        "start_byte": 51234
+        "line": 1181,
+        "start_byte": 52444
       },
       {
         "call": "ContextMenuEntry::new",
@@ -52835,11 +52804,11 @@
     "occurrences": [
       {
         "call": "header",
-        "end_byte": 52241,
+        "end_byte": 53451,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_header",
-        "line": 1180,
-        "start_byte": 52232
+        "line": 1203,
+        "start_byte": 53442
       }
     ],
     "status": "accepted"
@@ -57385,11 +57354,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 791,
+        "end_byte": 716,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 21,
-        "start_byte": 766
+        "line": 20,
+        "start_byte": 691
       }
     ],
     "status": "accepted"
@@ -57398,11 +57367,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 42180,
+        "end_byte": 43394,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 935,
-        "start_byte": 42161
+        "line": 958,
+        "start_byte": 43375
       }
     ],
     "status": "accepted"
@@ -63508,11 +63477,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 2238,
+        "end_byte": 2163,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 59,
-        "start_byte": 2194
+        "line": 58,
+        "start_byte": 2119
       }
     ],
     "status": "accepted"
@@ -65478,11 +65447,11 @@
     "occurrences": [
       {
         "call": "entry",
-        "end_byte": 44939,
+        "end_byte": 46153,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1005,
-        "start_byte": 44915
+        "line": 1028,
+        "start_byte": 46129
       }
     ],
     "status": "accepted"
@@ -66173,11 +66142,11 @@
     "occurrences": [
       {
         "call": "header",
-        "end_byte": 36810,
+        "end_byte": 38024,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_header",
-        "line": 843,
-        "start_byte": 36801
+        "line": 866,
+        "start_byte": 38015
       },
       {
         "call": "SettingsPageItem::SectionHeader",
@@ -66571,11 +66540,11 @@
     "occurrences": [
       {
         "call": "documentation_aside",
-        "end_byte": 38337,
+        "end_byte": 39551,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "documentation_aside",
-        "line": 869,
-        "start_byte": 38276
+        "line": 892,
+        "start_byte": 39490
       }
     ],
     "status": "accepted"
@@ -66584,11 +66553,11 @@
     "occurrences": [
       {
         "call": "documentation_aside",
-        "end_byte": 38707,
+        "end_byte": 39921,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "documentation_aside",
-        "line": 875,
-        "start_byte": 38642
+        "line": 898,
+        "start_byte": 39856
       }
     ],
     "status": "accepted"
@@ -66610,11 +66579,11 @@
     "occurrences": [
       {
         "call": "documentation_aside",
-        "end_byte": 39432,
+        "end_byte": 40646,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "documentation_aside",
-        "line": 887,
-        "start_byte": 39368
+        "line": 910,
+        "start_byte": 40582
       }
     ],
     "status": "accepted"
@@ -66623,11 +66592,11 @@
     "occurrences": [
       {
         "call": "documentation_aside",
-        "end_byte": 39066,
+        "end_byte": 40280,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "documentation_aside",
-        "line": 881,
-        "start_byte": 39008
+        "line": 904,
+        "start_byte": 40222
       }
     ],
     "status": "accepted"
@@ -66834,11 +66803,11 @@
     "occurrences": [
       {
         "call": "header",
-        "end_byte": 27235,
+        "end_byte": 28021,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_header",
-        "line": 612,
-        "start_byte": 27224
+        "line": 628,
+        "start_byte": 28010
       }
     ],
     "status": "accepted"
@@ -67407,11 +67376,11 @@
     "occurrences": [
       {
         "call": "action",
-        "end_byte": 45713,
+        "end_byte": 46927,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_action",
-        "line": 1021,
-        "start_byte": 45695
+        "line": 1044,
+        "start_byte": 46909
       }
     ],
     "status": "accepted"
@@ -70706,11 +70675,11 @@
     "occurrences": [
       {
         "call": "action_doc_comment",
-        "end_byte": 4150,
+        "end_byte": 4307,
         "file": "crates/edit_prediction/src/edit_prediction.rs",
         "kind": "action_description",
-        "line": 113,
-        "start_byte": 4106
+        "line": 117,
+        "start_byte": 4263
       }
     ],
     "status": "accepted"
@@ -79526,11 +79495,11 @@
     "occurrences": [
       {
         "call": "header",
-        "end_byte": 31539,
+        "end_byte": 32753,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_header",
-        "line": 723,
-        "start_byte": 31512
+        "line": 746,
+        "start_byte": 32726
       }
     ],
     "status": "accepted"
@@ -82163,6 +82132,14 @@
         "start_byte": 33531
       },
       {
+        "call": "entry",
+        "end_byte": 51688,
+        "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
+        "kind": "context_menu_entry",
+        "line": 1164,
+        "start_byte": 51679
+      },
+      {
         "call": "Button::new",
         "end_byte": 9627,
         "file": "crates/language_models/src/provider/openai_subscribed.rs",
@@ -82197,28 +82174,15 @@
     ],
     "status": "accepted"
   },
-  "Sign In & Start Using": {
-    "occurrences": [
-      {
-        "call": "entry",
-        "end_byte": 50478,
-        "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
-        "kind": "context_menu_entry",
-        "line": 1141,
-        "start_byte": 50455
-      }
-    ],
-    "status": "accepted"
-  },
   "Sign In Or Configure a Provider": {
     "occurrences": [
       {
         "call": "tooltip",
-        "end_byte": 21988,
+        "end_byte": 22442,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "tooltip",
-        "line": 467,
-        "start_byte": 21955
+        "line": 478,
+        "start_byte": 22409
       }
     ],
     "status": "accepted"
@@ -82227,11 +82191,11 @@
     "occurrences": [
       {
         "call": "entry",
-        "end_byte": 29729,
+        "end_byte": 30943,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 676,
-        "start_byte": 29692
+        "line": 699,
+        "start_byte": 30906
       }
     ],
     "status": "accepted"
@@ -82287,11 +82251,11 @@
       },
       {
         "call": "entry",
-        "end_byte": 48165,
+        "end_byte": 49379,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1081,
-        "start_byte": 48155
+        "line": 1104,
+        "start_byte": 49369
       },
       {
         "call": "button_label",
@@ -86221,11 +86185,11 @@
     "occurrences": [
       {
         "call": "entry",
-        "end_byte": 54813,
+        "end_byte": 57215,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1230,
-        "start_byte": 54779
+        "line": 1276,
+        "start_byte": 57181
       }
     ],
     "status": "accepted"
@@ -86338,11 +86302,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 35682,
+        "end_byte": 36896,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 820,
-        "start_byte": 35674
+        "line": 843,
+        "start_byte": 36888
       },
       {
         "call": "strum::VariantNames",
@@ -86432,6 +86396,19 @@
         "kind": "tab_title",
         "line": 90,
         "start_byte": 3059
+      }
+    ],
+    "status": "accepted"
+  },
+  "Suggestions at every keystroke, powered by Zeta, our open-source, open-data model. Included with Zed Pro and the Pro trial.": {
+    "occurrences": [
+      {
+        "call": "Label::new",
+        "end_byte": 51020,
+        "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
+        "kind": "label",
+        "line": 1147,
+        "start_byte": 50865
       }
     ],
     "status": "accepted"
@@ -91906,11 +91883,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 31923,
+        "end_byte": 33137,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 733,
-        "start_byte": 31910
+        "line": 756,
+        "start_byte": 33124
       }
     ],
     "status": "accepted"
@@ -92322,11 +92299,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 44550,
+        "end_byte": 45764,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 993,
-        "start_byte": 44526
+        "line": 1016,
+        "start_byte": 45740
       }
     ],
     "status": "accepted"
@@ -96337,11 +96314,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1915,
+        "end_byte": 1840,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 51,
-        "start_byte": 1890
+        "line": 50,
+        "start_byte": 1815
       }
     ],
     "status": "accepted"
@@ -96598,11 +96575,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 37706,
+        "end_byte": 38920,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 861,
-        "start_byte": 37680
+        "line": 884,
+        "start_byte": 38894
       }
     ],
     "status": "accepted"
@@ -97957,51 +97934,51 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 666,
+        "end_byte": 591,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 19,
-        "start_byte": 638
+        "line": 18,
+        "start_byte": 563
       },
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1010,
+        "end_byte": 935,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 27,
-        "start_byte": 982
+        "line": 26,
+        "start_byte": 907
       },
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1488,
+        "end_byte": 1413,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 39,
-        "start_byte": 1460
+        "line": 38,
+        "start_byte": 1385
       },
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1639,
+        "end_byte": 1564,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 44,
-        "start_byte": 1611
+        "line": 43,
+        "start_byte": 1536
       },
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1848,
+        "end_byte": 1773,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 50,
-        "start_byte": 1820
+        "line": 49,
+        "start_byte": 1745
       },
       {
         "call": "ListBulletItem::new",
-        "end_byte": 2065,
+        "end_byte": 1990,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 56,
-        "start_byte": 2037
+        "line": 55,
+        "start_byte": 1962
       }
     ],
     "status": "accepted"
@@ -98010,11 +97987,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 424,
+        "end_byte": 349,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 12,
-        "start_byte": 383
+        "line": 11,
+        "start_byte": 308
       }
     ],
     "status": "accepted"
@@ -98023,11 +98000,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 514,
+        "end_byte": 439,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 14,
-        "start_byte": 480
+        "line": 13,
+        "start_byte": 405
       }
     ],
     "status": "accepted"
@@ -98895,6 +98872,14 @@
         "start_byte": 488783
       },
       {
+        "call": "primary_message",
+        "end_byte": 135026,
+        "file": "crates/edit_prediction/src/edit_prediction.rs",
+        "kind": "notification_message",
+        "line": 3600,
+        "start_byte": 135017
+      },
+      {
         "call": "Button::new",
         "end_byte": 11748,
         "file": "crates/extensions_ui/src/components/extension_card.rs",
@@ -98915,6 +98900,14 @@
   },
   "Upgrade to Pro": {
     "occurrences": [
+      {
+        "call": "entry",
+        "end_byte": 54630,
+        "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
+        "kind": "context_menu_entry",
+        "line": 1228,
+        "start_byte": 54614
+      },
       {
         "call": "Button::new",
         "end_byte": 20323,
@@ -98951,11 +98944,11 @@
     "occurrences": [
       {
         "call": "entry",
-        "end_byte": 55943,
+        "end_byte": 58345,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1251,
-        "start_byte": 55908
+        "line": 1297,
+        "start_byte": 58310
       }
     ],
     "status": "accepted"
@@ -98964,11 +98957,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 52506,
+        "end_byte": 53716,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 1184,
-        "start_byte": 52452
+        "line": 1207,
+        "start_byte": 53662
       }
     ],
     "status": "accepted"
@@ -99029,11 +99022,11 @@
     "occurrences": [
       {
         "call": "header",
-        "end_byte": 52909,
+        "end_byte": 55311,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_header",
-        "line": 1196,
-        "start_byte": 52902
+        "line": 1242,
+        "start_byte": 55304
       }
     ],
     "status": "accepted"
@@ -99042,11 +99035,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1702,
+        "end_byte": 1627,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 45,
-        "start_byte": 1681
+        "line": 44,
+        "start_byte": 1606
       }
     ],
     "status": "accepted"
@@ -99055,11 +99048,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 1418,
+        "end_byte": 1343,
         "file": "crates/ai_onboarding/src/plan_definitions.rs",
         "kind": "list_bullet_item",
-        "line": 38,
-        "start_byte": 1387
+        "line": 37,
+        "start_byte": 1312
       }
     ],
     "status": "accepted"
@@ -99151,19 +99144,6 @@
         "kind": "setting_title",
         "line": 3839,
         "start_byte": 174844
-      }
-    ],
-    "status": "accepted"
-  },
-  "Use Copilot": {
-    "occurrences": [
-      {
-        "call": "Button::new",
-        "end_byte": 1775,
-        "file": "crates/ai_onboarding/src/edit_prediction_onboarding_content.rs",
-        "kind": "button",
-        "line": 56,
-        "start_byte": 1762
       }
     ],
     "status": "accepted"
@@ -100818,11 +100798,11 @@
     "occurrences": [
       {
         "call": "ContextMenuEntry::new",
-        "end_byte": 43754,
+        "end_byte": 44968,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "context_menu_entry",
-        "line": 972,
-        "start_byte": 43743
+        "line": 995,
+        "start_byte": 44957
       }
     ],
     "status": "accepted"
@@ -109102,19 +109082,6 @@
     ],
     "status": "accepted"
   },
-  "You get 2,000 accepted suggestions at every keystroke for free, powered by Zeta, our open-source, open-data model": {
-    "occurrences": [
-      {
-        "call": "Label::new",
-        "end_byte": 49796,
-        "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
-        "kind": "label",
-        "line": 1124,
-        "start_byte": 49651
-      }
-    ],
-    "status": "accepted"
-  },
   "You have access to Zed's hosted models through your Pro subscription.": {
     "occurrences": [
       {
@@ -109179,11 +109146,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 56624,
+        "end_byte": 59026,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 1264,
-        "start_byte": 56591
+        "line": 1310,
+        "start_byte": 58993
       }
     ],
     "status": "accepted"
@@ -109335,11 +109302,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 55560,
+        "end_byte": 57962,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 1244,
-        "start_byte": 55513
+        "line": 1290,
+        "start_byte": 57915
       }
     ],
     "status": "accepted"
@@ -109793,6 +109760,19 @@
         "kind": "rust_doc_comment",
         "line": 632,
         "start_byte": 20290
+      }
+    ],
+    "status": "accepted"
+  },
+  "Zed's edit predictions not included in the Free plan.": {
+    "occurrences": [
+      {
+        "call": "Label::new",
+        "end_byte": 54257,
+        "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
+        "kind": "label",
+        "line": 1221,
+        "start_byte": 54202
       }
     ],
     "status": "accepted"
@@ -117258,11 +117238,11 @@
     "occurrences": [
       {
         "call": "child",
-        "end_byte": 68401,
+        "end_byte": 70803,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "child_text",
-        "line": 1588,
-        "start_byte": 68396
+        "line": 1634,
+        "start_byte": 70798
       }
     ],
     "status": "accepted"
@@ -120688,11 +120668,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 54003,
+        "end_byte": 56405,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 1216,
-        "start_byte": 53989
+        "line": 1262,
+        "start_byte": 56391
       }
     ],
     "status": "ignored"
@@ -120714,11 +120694,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 54202,
+        "end_byte": 56604,
         "file": "crates/edit_prediction_ui/src/edit_prediction_button.rs",
         "kind": "label",
-        "line": 1219,
-        "start_byte": 54192
+        "line": 1265,
+        "start_byte": 56594
       }
     ],
     "status": "ignored"

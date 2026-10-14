@@ -74,6 +74,8 @@ PATCH_TARGETS = (
     "crates/workspace/Cargo.toml",
     "crates/workspace/src/pane.rs",
     "crates/workspace/src/welcome.rs",
+    "crates/which_key/Cargo.toml",
+    "crates/which_key/src/pending_bindings.rs",
 )
 
 
@@ -199,6 +201,13 @@ class RuntimeOverlayPatchTests(unittest.TestCase):
             "set_placeholder_text(include_placeholder(), window, cx)", project_search
         )
         self.assertNotIn("INCLUDE_PLACEHOLDER", project_search)
+
+        pending_bindings = self._read("crates/which_key/src/pending_bindings.rs")
+        self.assertIn('localization::localized_str!("is waiting for more keys…")', pending_bindings)
+        self.assertNotIn("HEADER_LABEL", pending_bindings)
+        self.assertIn("SharedString::from(header_label())", pending_bindings)
+        self.assertIn("Label::new(header_label())", pending_bindings)
+        self.assertIn("localization.workspace = true", self._read("crates/which_key/Cargo.toml"))
 
         language_selector = self._read("crates/language_selector/src/language_selector.rs")
         self.assertIn("mod localized_language_name;", language_selector)

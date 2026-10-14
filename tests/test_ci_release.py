@@ -1427,6 +1427,44 @@ class CiReleaseTests(unittest.TestCase):
             f"{rocket} Building installer\n",
         )
 
+    def test_linux_remote_server_patch_preserves_sentry_upload_condition(self) -> None:
+        script_dir = self.temp_root / "script"
+        script_dir.mkdir(parents=True)
+        script = script_dir / "bundle-linux"
+        script.write_text(
+            r'''if ! "$skip_sentry"; then
+    for attempt in 1 2 3; do
+        if sentry-cli debug-files upload --include-sources --wait -p zed -o zed-dev \
+            "${target_dir}/${target_triple}"/release/zed \
+            "${target_dir}/${remote_server_triple}"/release/remote_server; then
+            break
+        fi
+        if [ "$attempt" -eq 3 ]; then
+            exit 1
+        fi
+    done
+fi
+''',
+            encoding="utf-8",
+        )
+        expected = r'''if ! "$skip_sentry"; then
+    for attempt in 1 2 3; do
+        if sentry-cli debug-files upload --include-sources --wait -p zed -o zed-dev \
+            "${target_dir}/${target_triple}"/release/zed; then
+            break
+        fi
+        if [ "$attempt" -eq 3 ]; then
+            exit 1
+        fi
+    done
+fi
+'''
+
+        patch_remote_server_build(self.temp_root, "linux")
+        self.assertEqual(script.read_text(encoding="utf-8"), expected)
+        patch_remote_server_build(self.temp_root, "linux")
+        self.assertEqual(script.read_text(encoding="utf-8"), expected)
+
     def test_patches_bundle_scripts_to_skip_remote_server_build(self) -> None:
         script_dir = self.temp_root / "script"
         script_dir.mkdir(parents=True)

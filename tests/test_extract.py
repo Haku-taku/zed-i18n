@@ -7,6 +7,71 @@ from tools.zed_i18n.extract import extract_repository, extract_ui_strings_from_s
 
 
 class ExtractTests(unittest.TestCase):
+    def test_extracts_acp_v1_prompt_validation_error_only_in_production_function(self) -> None:
+        message = "This prompt contains content not supported by ACP v1"
+        source = f'''pub fn validate_prompt_content_for_v1() {{ bail!("{message}"); }}
+fn diagnostic() {{ log::info!("{message}"); }}
+#[cfg(test)] mod tests {{
+    fn validate_prompt_content_for_v1() {{ assert_eq!(error, "{message}"); }}
+}}
+'''
+        occurrences = extract_ui_strings_from_source(
+            source, relative_path="crates/acp_thread/src/content.rs"
+        )
+        self.assertEqual([o.source for o in occurrences], [message])
+        self.assertEqual(occurrences[0].kind, "thread_error_message")
+        self.assertEqual(occurrences[0].line, 1)
+
+    def test_extracts_notification_secondary_menu_label_only(self) -> None:
+        source = '''fn render() {
+    notification("notification-id", cx)
+        .secondary_menu_entry("Disable Suggestions", |_, cx| {
+            log::info!("disable-suggestions-action");
+        });
+}'''
+        occurrences = extract_ui_strings_from_source(
+            source, relative_path="crates/extensions_ui/src/extension_suggestions.rs"
+        )
+        menu_labels = [o for o in occurrences if o.call == "secondary_menu_entry"]
+        self.assertEqual([o.source for o in menu_labels], ["Disable Suggestions"])
+        self.assertNotIn("disable-suggestions-action", {o.source for o in occurrences})
+        self.assertEqual({o.source for o in occurrences}, {"Disable Suggestions"})
+
+    def test_extracts_markdown_preview_tab_context_menu(self) -> None:
+        source = '''fn tab_extra_context_menu_actions() -> Vec<(SharedString, Box<dyn Action>)> {
+    vec![("Show Source".into(), Box::new(CloseAndReturnToEditor))]
+}
+#[cfg(test)] mod tests {
+    fn open_preview_url() {
+        open_url(
+            "notes.md:5:3".into(),
+            "tel:123".into(),
+        );
+    }
+}'''
+        occurrences = extract_ui_strings_from_source(
+            source, relative_path="crates/markdown_preview/src/markdown_preview_view.rs"
+        )
+        self.assertEqual([o.source for o in occurrences], ["Show Source"])
+
+    def test_extracts_pending_bindings_header_constant(self) -> None:
+        source = '''const HEADER_LABEL: &str = "is waiting for more keys…";
+const INTERNAL_ID: &str = "pending-bindings";
+'''
+        occurrences = extract_ui_strings_from_source(
+            source, relative_path="crates/which_key/src/pending_bindings.rs"
+        )
+        self.assertEqual([o.source for o in occurrences], ["is waiting for more keys…"])
+        occurrence = occurrences[0]
+        self.assertEqual(
+            source.encode()[occurrence.start_byte:occurrence.end_byte].decode(),
+            '"is waiting for more keys…"',
+        )
+        self.assertEqual(
+            extract_ui_strings_from_source(source, relative_path="crates/protocol/src/lib.rs"),
+            [],
+        )
+
     def test_extracts_v1_23_function_scoped_ui_values(self) -> None:
         cases = [
             ("crates/agent_ui/src/conversation_view.rs", "plan_summary_label", 'if done { "All Done".to_owned() } else { format!("{entry_count} Tasks") }', {"All Done", "{entry_count} Tasks"}),

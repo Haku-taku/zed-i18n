@@ -83,11 +83,11 @@
       },
       {
         "call": "ListBulletItem::new",
-        "end_byte": 48380,
+        "end_byte": 48395,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "list_bullet_item",
         "line": 1344,
-        "start_byte": 48378
+        "start_byte": 48393
       },
       {
         "call": "LoadingLabel::new",
@@ -4442,11 +4442,11 @@
       },
       {
         "call": "label",
-        "end_byte": 44102,
+        "end_byte": 44117,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1218,
-        "start_byte": 44093
+        "start_byte": 44108
       }
     ],
     "status": "accepted"
@@ -4479,11 +4479,11 @@
       },
       {
         "call": "ConfiguredApiCard::new",
-        "end_byte": 47227,
+        "end_byte": 47242,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "configured_api_card_label",
         "line": 1314,
-        "start_byte": 47207
+        "start_byte": 47222
       }
     ],
     "status": "accepted"
@@ -4500,11 +4500,11 @@
       },
       {
         "call": "ConfiguredApiCard::new",
-        "end_byte": 47312,
+        "end_byte": 47327,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "configured_api_card_label",
         "line": 1316,
-        "start_byte": 47285
+        "start_byte": 47300
       }
     ],
     "status": "accepted"
@@ -4534,11 +4534,11 @@
     "occurrences": [
       {
         "call": "ConfiguredApiCard::new",
-        "end_byte": 47057,
+        "end_byte": 47072,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "configured_api_card_label",
         "line": 1310,
-        "start_byte": 46997
+        "start_byte": 47012
       }
     ],
     "status": "accepted"
@@ -37383,11 +37383,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 51950,
+        "end_byte": 51965,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1423,
-        "start_byte": 51906
+        "start_byte": 51921
       }
     ],
     "status": "accepted"
@@ -51572,11 +51572,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 49433,
+        "end_byte": 49448,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1368,
-        "start_byte": 49409
+        "start_byte": 49424
       }
     ],
     "status": "accepted"
@@ -58525,11 +58525,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 51430,
+        "end_byte": 51445,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1409,
-        "start_byte": 51353
+        "start_byte": 51368
       }
     ],
     "status": "accepted"
@@ -61875,11 +61875,11 @@
     "occurrences": [
       {
         "call": "Headline::new",
-        "end_byte": 52193,
+        "end_byte": 52208,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "headline",
         "line": 1431,
-        "start_byte": 52183
+        "start_byte": 52198
       }
     ],
     "status": "accepted"
@@ -61888,11 +61888,11 @@
     "occurrences": [
       {
         "call": "ButtonLink::new",
-        "end_byte": 48582,
+        "end_byte": 48597,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "button_link",
         "line": 1347,
-        "start_byte": 48564
+        "start_byte": 48579
       }
     ],
     "status": "accepted"
@@ -61901,11 +61901,11 @@
     "occurrences": [
       {
         "call": "OpenCode.catalog_error",
-        "end_byte": 39200,
+        "end_byte": 39208,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "provider_model_error",
         "line": 1088,
-        "start_byte": 39156
+        "start_byte": 39164
       }
     ],
     "status": "accepted"
@@ -61914,11 +61914,11 @@
     "occurrences": [
       {
         "call": "OpenCode.catalog_error",
-        "end_byte": 43477,
+        "end_byte": 43492,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "provider_model_error",
         "line": 1196,
-        "start_byte": 43430
+        "start_byte": 43445
       }
     ],
     "status": "accepted"
@@ -61927,11 +61927,11 @@
     "occurrences": [
       {
         "call": "OpenCode.catalog_error",
-        "end_byte": 42932,
+        "end_byte": 42947,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "provider_model_error",
         "line": 1183,
-        "start_byte": 42890
+        "start_byte": 42905
       }
     ],
     "status": "accepted"
@@ -61940,11 +61940,11 @@
     "occurrences": [
       {
         "call": "OpenCode.catalog_error",
-        "end_byte": 42086,
+        "end_byte": 42101,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "provider_model_error",
         "line": 1159,
-        "start_byte": 42023
+        "start_byte": 42038
       }
     ],
     "status": "accepted"
@@ -64874,11 +64874,11 @@
     "occurrences": [
       {
         "call": "ListBulletItem::new",
-        "end_byte": 48893,
+        "end_byte": 48908,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "list_bullet_item",
         "line": 1353,
-        "start_byte": 48829
+        "start_byte": 48844
       }
     ],
     "status": "accepted"
@@ -80158,11 +80158,11 @@
     "occurrences": [
       {
         "call": "label",
-        "end_byte": 50693,
+        "end_byte": 50708,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1395,
-        "start_byte": 50677
+        "start_byte": 50692
       }
     ],
     "status": "accepted"
@@ -80679,11 +80679,11 @@
     "occurrences": [
       {
         "call": "label",
-        "end_byte": 49964,
+        "end_byte": 49979,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1380,
-        "start_byte": 49947
+        "start_byte": 49962
       }
     ],
     "status": "accepted"
@@ -82821,11 +82821,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 48457,
+        "end_byte": 48472,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1345,
-        "start_byte": 48428
+        "start_byte": 48443
       }
     ],
     "status": "accepted"
@@ -86796,11 +86796,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 49770,
+        "end_byte": 49785,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1376,
-        "start_byte": 49755
+        "start_byte": 49770
       }
     ],
     "status": "accepted"
@@ -94285,11 +94285,11 @@
       },
       {
         "call": "tooltip_label",
-        "end_byte": 47842,
+        "end_byte": 47857,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "tooltip",
         "line": 1329,
-        "start_byte": 47763
+        "start_byte": 47778
       }
     ],
     "status": "accepted"
@@ -94384,11 +94384,11 @@
     "occurrences": [
       {
         "call": "Label::new",
-        "end_byte": 48221,
+        "end_byte": 48236,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1339,
-        "start_byte": 48168
+        "start_byte": 48183
       }
     ],
     "status": "accepted"
@@ -109726,11 +109726,11 @@
       },
       {
         "call": "Label::new",
-        "end_byte": 49181,
+        "end_byte": 49196,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "label",
         "line": 1360,
-        "start_byte": 49098
+        "start_byte": 49113
       }
     ],
     "status": "accepted"
@@ -117138,11 +117138,11 @@
     "occurrences": [
       {
         "call": "OpenCode.catalog_error",
-        "end_byte": 43357,
+        "end_byte": 43372,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "provider_model_error",
         "line": 1193,
-        "start_byte": 43319
+        "start_byte": 43334
       }
     ],
     "status": "accepted"
@@ -117709,11 +117709,11 @@
     "occurrences": [
       {
         "call": "InputField::new",
-        "end_byte": 44085,
+        "end_byte": 44100,
         "file": "crates/language_models/src/provider/opencode.rs",
         "kind": "placeholder",
         "line": 1218,
-        "start_byte": 44048
+        "start_byte": 44063
       }
     ],
     "status": "ignored"

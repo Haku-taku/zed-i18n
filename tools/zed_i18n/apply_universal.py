@@ -1033,6 +1033,20 @@ fn observe_text(text: &str) {
 
 def _register_const_context_patches(patch, dependency) -> None:
     patch(
+        "crates/which_key/src/pending_bindings.rs",
+        '''const HEADER_LABEL: &str = "is waiting for more keys…";''',
+        '''fn header_label() -> &'static str {
+    localization::localized_str!("is waiting for more keys…")
+}''',
+    )
+    for old, new in (
+        ("SharedString::from(HEADER_LABEL)", "SharedString::from(header_label())"),
+        ("Label::new(HEADER_LABEL)", "Label::new(header_label())"),
+    ):
+        patch("crates/which_key/src/pending_bindings.rs", old, new)
+    dependency("crates/which_key/Cargo.toml", "gpui", "localization")
+
+    patch(
         "crates/agent_ui/src/agent_configuration/configure_context_server_modal.rs",
         '''        const MODAL_DESCRIPTION: &str =
             "Check the server docs for required arguments and environment variables.";''',
@@ -1490,6 +1504,7 @@ def _register_thiserror_patches(patch, dependency) -> None:
 # new const/static or #[error] string fails the apply loudly instead of
 # silently shipping English at runtime. Update it together with the patches.
 _EXPECTED_MANUAL_SITES: frozenset[tuple[str, str]] = frozenset({
+    ("crates/which_key/src/pending_bindings.rs", "is waiting for more keys…"),
     ("crates/agent_ui/src/agent_configuration/configure_context_server_modal.rs", "Check the server docs for required arguments and environment variables."),
     ("crates/copilot_ui/src/sign_in.rs", "Copilot Edit Predictions had issues starting. You can try reinstalling it and signing in again."),
     ("crates/debugger_tools/src/dap_log.rs", "Adapter Logs"),

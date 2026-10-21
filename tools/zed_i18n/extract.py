@@ -1133,6 +1133,8 @@ def _rules_for_call(call: str) -> tuple[tuple[int, str, str], ...]:
         return ((0, "notification_message", "primary_message"),)
     if canonical.endswith(".secondary_message") or canonical == "secondary_message":
         return ((0, "notification_message", "secondary_message"),)
+    if canonical.endswith(".secondary_menu_entry") or canonical == "secondary_menu_entry":
+        return ((0, "context_menu_entry", "secondary_menu_entry"),)
     if canonical.endswith(".documentation_aside") or canonical == "documentation_aside":
         return ((1, "documentation_aside", "documentation_aside"),)
     if canonical.endswith(".render_section_title") or canonical == "render_section_title":
@@ -2249,6 +2251,15 @@ def _extract_exact_line_literal_occurrences(
     relative_path: str,
 ) -> list[StringOccurrence]:
     rules: list[tuple[re.Pattern[str], str, str, set[str]]] = []
+    if relative_path == "crates/which_key/src/pending_bindings.rs":
+        rules.append(
+            (
+                re.compile(r'^\s*const HEADER_LABEL:\s*&str\s*=\s*("(?:\\.|[^"\\])*");'),
+                "label",
+                "PendingBindings.HEADER_LABEL",
+                {"is waiting for more keys…"},
+            )
+        )
     if _is_agent_conversation_view_path(relative_path):
         rules.append(
             (
@@ -2383,6 +2394,15 @@ def _extract_exact_line_literal_occurrences(
 # Scope these to their production function, since several files repeat the
 # same text in assertions, protocol handling, or diagnostic output.
 FUNCTION_UI_LITERAL_RULES: dict[str, dict[str, tuple[set[str], str]]] = {
+    "crates/markdown_preview/src/markdown_preview_view.rs": {
+        "tab_extra_context_menu_actions": ({"Show Source"}, "context_menu_action"),
+    },
+    "crates/acp_thread/src/content.rs": {
+        "validate_prompt_content_for_v1": (
+            {"This prompt contains content not supported by ACP v1"},
+            "thread_error_message",
+        ),
+    },
     "crates/agent_ui/src/conversation_view.rs": {
         "plan_summary_label": ({"All Done", "Cancelled", "Finished", "{entry_count} Tasks"}, "label"),
     },

@@ -447,9 +447,11 @@ def patch_linux_remote_server_build(path: Path) -> None:
         script,
         flags=re.MULTILINE | re.DOTALL,
     )
-    script = script.replace(
-        ' \\\n                "${target_dir}/${remote_server_triple}"/release/remote_server',
+    script = re.sub(
+        r' \\\n[ \t]+"\$\{target_dir\}/\$\{remote_server_triple\}"/release/remote_server(?=; then|$)',
         "",
+        script,
+        flags=re.MULTILINE,
     )
     script = script.replace(
         'llvm-objcopy --strip-debug "${target_dir}/${remote_server_triple}/release/remote_server"\n',
